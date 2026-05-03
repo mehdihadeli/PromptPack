@@ -1,0 +1,23 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>promptpack</ToolCommandName>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageVersion Include="Spectre.Console" Version="0.48.0" />
+        <PackageVersion Include="Spectre.Console.Cli" Version="0.48.0" />
+        <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+        <PackageVersion Include="Glob" Version="1.1.8" />
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.1.25080.5" />
+        <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.1.25080.5" />
+        <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
+        <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.1" />
+    </ItemGroup>
+</Project>

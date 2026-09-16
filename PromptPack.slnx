@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PromptPack.Cli/PromptPack.Cli.csproj" />
+    <Project Path="src/PromptPack.Core/PromptPack.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PromptPack.Cli.Tests/PromptPack.Cli.Tests.csproj" />
+    <Project Path="tests/PromptPack.Core.Tests/PromptPack.Core.Tests.csproj" />
+  </Folder>
+</Solution>

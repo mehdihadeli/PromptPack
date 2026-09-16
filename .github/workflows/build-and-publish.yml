@@ -1,0 +1,64 @@
+name: Build, test, and publish
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore PromptPack.slnx
+
+      - name: Build
+        run: dotnet build PromptPack.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --solution PromptPack.slnx --configuration Release --no-restore
+
+  publish:
+    name: Publish NuGet package
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-test
+    runs-on: ubuntu-latest
+    environment: nuget
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/PromptPack.Cli/PromptPack.Cli.csproj
+
+      - name: Pack
+        run: dotnet pack src/PromptPack.Cli/PromptPack.Cli.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true
+
+      - name: Publish to NuGet.org
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

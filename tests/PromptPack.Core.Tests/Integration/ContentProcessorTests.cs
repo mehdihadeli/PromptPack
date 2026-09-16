@@ -22,9 +22,9 @@ public class ContentProcessorTests
                 NullLogger<ContentProcessor>.Instance
             ).ProcessFileAsync(filePath, directory.FullName, true, true, false);
 
-            Assert.DoesNotContain("comment", processed.Content);
-            Assert.DoesNotContain("\n\n", processed.Content);
-            Assert.Contains("class Sample", processed.Content);
+            processed.Content.ShouldNotContain("comment");
+            processed.Content.ShouldNotContain("\n\n");
+            processed.Content.ShouldContain("class Sample");
         }
         finally
         {
@@ -49,10 +49,10 @@ public class ContentProcessorTests
                 NullLogger<ContentProcessor>.Instance
             ).ProcessFileAsync(filePath, directory.FullName, false, false, true);
 
-            Assert.Contains("public class Sample", processed.Content);
-            Assert.Contains("public void Run()", processed.Content);
-            Assert.Contains("{ ... }", processed.Content);
-            Assert.DoesNotContain("Console.WriteLine", processed.Content);
+            processed.Content.ShouldContain("public class Sample");
+            processed.Content.ShouldContain("public void Run()");
+            processed.Content.ShouldContain("{ ... }");
+            processed.Content.ShouldNotContain("Console.WriteLine");
         }
         finally
         {

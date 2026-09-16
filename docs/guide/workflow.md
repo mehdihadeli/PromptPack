@@ -7,7 +7,7 @@ Use PromptPack as a repeatable context preparation step before asking an AI tool
 Create a baseline package so you can see what the collector includes:
 
 ```bash
-dotnet run -- . --style markdown --output baseline.md
+promptpack -y markdown -o baseline.md
 ```
 
 Inspect the directory structure and file summary before adding filters.
@@ -17,10 +17,10 @@ Inspect the directory structure and file summary before adding filters.
 Use `--include` when the task has a clear scope:
 
 ```bash
-dotnet run -- . \
-  --include "src/**/*.cs,tests/**/*.cs,README.md" \
-  --style markdown \
-  --output implementation.md
+promptpack \
+  -i "src/**/*.cs,tests/**/*.cs,README.md" \
+  -y markdown \
+  -o implementation.md
 ```
 
 Use `--exclude` for known noise such as generated files, snapshots, or local documentation. The older `--ignore` option remains supported.
@@ -40,7 +40,7 @@ For repeatable selections, put the same values in `promptpack.config.yaml`. Use 
 Estimate the result before sending it to a model:
 
 ```bash
-dotnet run -- . --token-count --token-budget 12000 --style markdown
+promptpack -t -b 12000 -y markdown
 ```
 
 A budget overflow reports the estimate and exits with code `2`. This makes the command usable in scripts that need to stop before producing an oversized handoff.
@@ -50,16 +50,16 @@ A budget overflow reports the estimate and exits with code `2`. This makes the c
 Clipboard is the default for interactive work. Use a file for review or archival, and stdout for shell pipelines:
 
 ```bash
-dotnet run -- . --style json --output context.json
-dotnet run -- . --style plain --stdout > context.txt
+promptpack -y json -o context.json
+promptpack -y plain -s > context.txt
 ```
 
-Add `--copy` when you want a file or stdout result and a clipboard copy as well.
+Add `-c` when you want a file or stdout result and a clipboard copy as well.
 
 For shell pipelines, pass a newline-delimited file list through stdin:
 
 ```bash
-git ls-files 'src/**/*.cs' | dotnet run -- . --stdin --style plain --stdout
+git ls-files 'src/**/*.cs' | promptpack -q -y plain -s
 ```
 
 For larger handoffs, use `--split-output 2MB` with a file destination. PromptPack creates numbered sibling files. Use `--include-full-directory-structure` when the model needs to understand repository layout beyond the selected file contents.

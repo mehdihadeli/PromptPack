@@ -18,9 +18,9 @@ public class XmlOutputGeneratorTests
         var document = XDocument.Parse(output);
         var file = document.Root!.Element("files")!.Element("file")!;
 
-        Assert.Equal("src/Program.cs", file.Attribute("path")!.Value);
-        Assert.Equal("csharp", file.Attribute("language")!.Value);
-        Assert.Equal("if (value < 1) { }", file.Value);
-        Assert.Equal("1", document.Root.Element("file_summary")!.Element("file_count")!.Value);
+        file.Attribute("path")!.Value.ShouldBe("src/Program.cs");
+        file.Attribute("language")!.Value.ShouldBe("csharp");
+        file.Value.ShouldBe("if (value < 1) { }");
+        document.Root.Element("file_summary")!.Element("file_count")!.Value.ShouldBe("1");
     }
 }

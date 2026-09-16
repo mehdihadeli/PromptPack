@@ -37,12 +37,9 @@ public sealed class FileCollectorFeatureTests
                 NullLogger<FileCollector>.Instance
             ).CollectPathsFromStdinAsync(directory.FullName, "**/*.cs", null);
 
-            Assert.Equal(
-                ["src/Program.cs"],
-                files.Select(path =>
-                    Path.GetRelativePath(directory.FullName, path).Replace('\\', '/')
-                )
-            );
+            files
+                .Select(path => Path.GetRelativePath(directory.FullName, path).Replace('\\', '/'))
+                .ShouldBe(["src/Program.cs"]);
         }
         finally
         {
@@ -74,7 +71,7 @@ public sealed class FileCollectorFeatureTests
                 NullLogger<FileCollector>.Instance
             ).CollectDirectoryPathsAsync(directory.FullName, null);
 
-            Assert.Equal(["src/Program.cs"], paths);
+            paths.ShouldBe(["src/Program.cs"]);
         }
         finally
         {

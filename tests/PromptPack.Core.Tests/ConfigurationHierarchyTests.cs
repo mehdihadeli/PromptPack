@@ -30,10 +30,10 @@ public sealed class ConfigurationHierarchyTests
 
             var config = await new ConfigurationLoader().LoadAsync(child.FullName, explicitPath);
 
-            Assert.Equal("child/**", config.Include);
-            Assert.True(config.SecurityScan);
-            Assert.Equal("Explicit review", config.HeaderText);
-            Assert.Equal("1KB", config.SplitOutput);
+            config.Include.ShouldBe("child/**");
+            config.SecurityScan.ShouldBe(true);
+            config.HeaderText.ShouldBe("Explicit review");
+            config.SplitOutput.ShouldBe("1KB");
         }
         finally
         {

@@ -28,12 +28,9 @@ public class FileCollectorTests
                 NullLogger<FileCollector>.Instance
             ).CollectFilesAsync(directory.FullName, null, null);
 
-            Assert.Equal(
-                ["src/Program.cs"],
-                files.Select(file =>
-                    Path.GetRelativePath(directory.FullName, file).Replace('\\', '/')
-                )
-            );
+            files
+                .Select(file => Path.GetRelativePath(directory.FullName, file).Replace('\\', '/'))
+                .ShouldBe(["src/Program.cs"]);
         }
         finally
         {
@@ -72,7 +69,7 @@ public class FileCollectorTests
                 .Select(file => Path.GetRelativePath(directory.FullName, file).Replace('\\', '/'))
                 .ToArray();
 
-            Assert.Equal(["src/Program.cs"], relativeFiles);
+            relativeFiles.ShouldBe(["src/Program.cs"]);
         }
         finally
         {
@@ -112,7 +109,7 @@ public class FileCollectorTests
                 .OrderBy(path => path)
                 .ToArray();
 
-            Assert.Equal([".gitignore", "README.md"], relativeFiles);
+            relativeFiles.ShouldBe([".gitignore", "README.md"]);
         }
         finally
         {

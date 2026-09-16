@@ -19,9 +19,9 @@ public sealed class SecurityScannerTests
 
             var findings = await new SecurityScanner().ScanAsync([path], directory.FullName);
 
-            Assert.Single(findings);
-            Assert.Equal("secrets.txt", findings[0].RelativePath);
-            Assert.Equal("private key", findings[0].Rule);
+            findings.ShouldHaveSingleItem();
+            findings[0].RelativePath.ShouldBe("secrets.txt");
+            findings[0].Rule.ShouldBe("private key");
         }
         finally
         {
@@ -44,8 +44,8 @@ public sealed class SecurityScannerTests
 
             var findings = await new SecurityScanner().ScanAsync([path], directory.FullName);
 
-            Assert.Single(findings);
-            Assert.Equal("generic secret assignment", findings[0].Rule);
+            findings.ShouldHaveSingleItem();
+            findings[0].Rule.ShouldBe("generic secret assignment");
         }
         finally
         {

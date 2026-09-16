@@ -10,13 +10,13 @@ public sealed class PackSettings : CommandSettings
     [CommandOption("-o|--output")]
     public string? Output { get; set; }
 
-    [CommandOption("-s|--style")]
-    public string Style { get; set; } = "xml";
+    [CommandOption("-y|--style")]
+    public string Style { get; set; } = "markdown";
 
     [CommandOption("-c|--copy")]
     public bool Copy { get; set; }
 
-    [CommandOption("-S|--stdout")]
+    [CommandOption("-s|--stdout")]
     public bool Stdout { get; set; }
 
     [CommandOption("-i|--include")]
@@ -25,7 +25,7 @@ public sealed class PackSettings : CommandSettings
     [CommandOption("-e|--exclude|--ignore")]
     public string? Ignore { get; set; }
 
-    [CommandOption("-C|--compress")]
+    [CommandOption("-x|--compress")]
     public bool Compress { get; set; }
 
     [CommandOption("-r|--remove-comments")]
@@ -37,10 +37,10 @@ public sealed class PackSettings : CommandSettings
     [CommandOption("-n|--output-show-line-numbers")]
     public bool ShowLineNumbers { get; set; }
 
-    [CommandOption("-F|--no-file-summary")]
+    [CommandOption("-m|--no-file-summary")]
     public bool NoFileSummary { get; set; }
 
-    [CommandOption("-D|--no-directory-structure")]
+    [CommandOption("-d|--no-directory-structure")]
     public bool NoDirectoryStructure { get; set; }
 
     [CommandOption("-f|--no-files")]
@@ -64,13 +64,13 @@ public sealed class PackSettings : CommandSettings
     [CommandOption("-k|--security-scan")]
     public bool SecurityScan { get; set; }
 
-    [CommandOption("-H|--header-text")]
+    [CommandOption("-h|--header-text")]
     public string? HeaderText { get; set; }
 
-    [CommandOption("-P|--instruction-file-path")]
+    [CommandOption("-p|--instruction-file-path")]
     public string? InstructionFilePath { get; set; }
 
-    [CommandOption("-T|--include-full-directory-structure")]
+    [CommandOption("-a|--include-full-directory-structure")]
     public bool IncludeFullDirectoryStructure { get; set; }
 
     [CommandOption("-z|--split-output")]

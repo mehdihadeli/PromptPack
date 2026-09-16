@@ -8,7 +8,7 @@ public class TokenEstimatorTests
     [Fact]
     public void EstimateTokens_EmptyContentReturnsZero()
     {
-        Assert.Equal(0, new TokenEstimator().EstimateTokens(string.Empty));
+        new TokenEstimator().EstimateTokens(string.Empty).ShouldBe(0);
     }
 
     [Fact]
@@ -26,8 +26,8 @@ public class TokenEstimatorTests
 
         var estimates = new TokenEstimator().EstimatePerFile(context);
 
-        Assert.Equal(2, estimates.Count);
-        Assert.All(estimates.Values, estimate => Assert.True(estimate > 0));
-        Assert.Contains("README.md", estimates.Keys);
+        estimates.Count.ShouldBe(2);
+        estimates.Values.ShouldAllBe(estimate => estimate > 0);
+        estimates.Keys.ShouldContain("README.md");
     }
 }

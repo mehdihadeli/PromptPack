@@ -5,34 +5,34 @@ namespace PromptPack.Cli.Tests.Unit;
 public class PackSettingsTests
 {
     [Fact]
-    public void Defaults_TargetCurrentDirectoryAndXmlOutput()
+    public void Defaults_TargetCurrentDirectoryAndMarkdownOutput()
     {
         var settings = new PackSettings();
 
-        Assert.Equal(".", settings.Directory);
-        Assert.Equal("xml", settings.Style);
-        Assert.Null(settings.Output);
-        Assert.Null(settings.Include);
-        Assert.Null(settings.Ignore);
-        Assert.Null(settings.TokenBudget);
-        Assert.False(settings.Copy);
-        Assert.False(settings.Stdout);
-        Assert.False(settings.Compress);
-        Assert.False(settings.RemoveComments);
-        Assert.False(settings.RemoveEmptyLines);
-        Assert.False(settings.ShowLineNumbers);
-        Assert.False(settings.NoFileSummary);
-        Assert.False(settings.NoDirectoryStructure);
-        Assert.False(settings.NoFiles);
-        Assert.False(settings.TokenCount);
-        Assert.False(settings.Verbose);
-        Assert.Null(settings.Config);
-        Assert.False(settings.Stdin);
-        Assert.False(settings.SecurityScan);
-        Assert.Null(settings.HeaderText);
-        Assert.Null(settings.InstructionFilePath);
-        Assert.False(settings.IncludeFullDirectoryStructure);
-        Assert.Null(settings.SplitOutput);
+        settings.Directory.ShouldBe(".");
+        settings.Style.ShouldBe("markdown");
+        settings.Output.ShouldBeNull();
+        settings.Include.ShouldBeNull();
+        settings.Ignore.ShouldBeNull();
+        settings.TokenBudget.ShouldBeNull();
+        settings.Copy.ShouldBeFalse();
+        settings.Stdout.ShouldBeFalse();
+        settings.Compress.ShouldBeFalse();
+        settings.RemoveComments.ShouldBeFalse();
+        settings.RemoveEmptyLines.ShouldBeFalse();
+        settings.ShowLineNumbers.ShouldBeFalse();
+        settings.NoFileSummary.ShouldBeFalse();
+        settings.NoDirectoryStructure.ShouldBeFalse();
+        settings.NoFiles.ShouldBeFalse();
+        settings.TokenCount.ShouldBeFalse();
+        settings.Verbose.ShouldBeFalse();
+        settings.Config.ShouldBeNull();
+        settings.Stdin.ShouldBeFalse();
+        settings.SecurityScan.ShouldBeFalse();
+        settings.HeaderText.ShouldBeNull();
+        settings.InstructionFilePath.ShouldBeNull();
+        settings.IncludeFullDirectoryStructure.ShouldBeFalse();
+        settings.SplitOutput.ShouldBeNull();
     }
 
     [Fact]
@@ -66,27 +66,27 @@ public class PackSettingsTests
             SplitOutput = "2MB",
         };
 
-        Assert.Equal("src", settings.Directory);
-        Assert.Equal("context.json", settings.Output);
-        Assert.Equal("json", settings.Style);
-        Assert.True(settings.Copy);
-        Assert.Equal("**/*.cs", settings.Include);
-        Assert.Equal("**/*.generated.cs", settings.Ignore);
-        Assert.True(settings.Compress);
-        Assert.True(settings.RemoveComments);
-        Assert.True(settings.RemoveEmptyLines);
-        Assert.True(settings.ShowLineNumbers);
-        Assert.True(settings.NoFileSummary);
-        Assert.True(settings.NoDirectoryStructure);
-        Assert.Equal(10_000, settings.TokenBudget);
-        Assert.True(settings.TokenCount);
-        Assert.True(settings.Verbose);
-        Assert.Equal("promptpack.config.yaml", settings.Config);
-        Assert.True(settings.Stdin);
-        Assert.True(settings.SecurityScan);
-        Assert.Equal("Review this", settings.HeaderText);
-        Assert.Equal("instructions.md", settings.InstructionFilePath);
-        Assert.True(settings.IncludeFullDirectoryStructure);
-        Assert.Equal("2MB", settings.SplitOutput);
+        settings.Directory.ShouldBe("src");
+        settings.Output.ShouldBe("context.json");
+        settings.Style.ShouldBe("json");
+        settings.Copy.ShouldBeTrue();
+        settings.Include.ShouldBe("**/*.cs");
+        settings.Ignore.ShouldBe("**/*.generated.cs");
+        settings.Compress.ShouldBeTrue();
+        settings.RemoveComments.ShouldBeTrue();
+        settings.RemoveEmptyLines.ShouldBeTrue();
+        settings.ShowLineNumbers.ShouldBeTrue();
+        settings.NoFileSummary.ShouldBeTrue();
+        settings.NoDirectoryStructure.ShouldBeTrue();
+        settings.TokenBudget.ShouldBe(10_000);
+        settings.TokenCount.ShouldBeTrue();
+        settings.Verbose.ShouldBeTrue();
+        settings.Config.ShouldBe("promptpack.config.yaml");
+        settings.Stdin.ShouldBeTrue();
+        settings.SecurityScan.ShouldBeTrue();
+        settings.HeaderText.ShouldBe("Review this");
+        settings.InstructionFilePath.ShouldBe("instructions.md");
+        settings.IncludeFullDirectoryStructure.ShouldBeTrue();
+        settings.SplitOutput.ShouldBe("2MB");
     }
 }

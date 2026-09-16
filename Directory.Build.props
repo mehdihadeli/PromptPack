@@ -11,7 +11,11 @@
         <Authors>Your Name</Authors>
         <Description>AI-friendly repository context packer for .NET</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/yourusername/RepoPacker</RepositoryUrl>
+        <RepositoryUrl>https://github.com/yourusername/PromptPack</RepositoryUrl>
         <PackageTags>ai;llm;code-analysis;repository;context</PackageTags>
     </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
+    </ItemGroup>
 </Project>

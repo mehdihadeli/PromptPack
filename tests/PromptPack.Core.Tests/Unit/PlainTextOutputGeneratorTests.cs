@@ -16,9 +16,9 @@ public class PlainTextOutputGeneratorTests
 
         var output = new PlainTextOutputGenerator().Generate(context);
 
-        Assert.Contains("REPOSITORY CONTEXT FOR AI ANALYSIS", output);
-        Assert.Contains("DIRECTORY STRUCTURE", output);
-        Assert.DoesNotContain("FILES", output);
-        Assert.DoesNotContain("FILE: README.md", output);
+        output.ShouldContain("REPOSITORY CONTEXT FOR AI ANALYSIS");
+        output.ShouldContain("DIRECTORY STRUCTURE");
+        output.Contains("FILES", StringComparison.Ordinal).ShouldBeFalse();
+        output.ShouldNotContain("FILE: README.md");
     }
 }

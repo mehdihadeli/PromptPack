@@ -20,15 +20,17 @@ public class JsonOutputGeneratorTests
         using var document = JsonDocument.Parse(new JsonOutputGenerator().Generate(context));
         var root = document.RootElement;
 
-        Assert.Equal(JsonValueKind.Null, root.GetProperty("fileSummary").ValueKind);
-        Assert.Equal(JsonValueKind.Null, root.GetProperty("directoryStructure").ValueKind);
-        Assert.Equal(
-            "markdown",
-            root.GetProperty("files").GetProperty("README.md").GetProperty("language").GetString()
-        );
-        Assert.Contains(
-            "1 | first",
-            root.GetProperty("files").GetProperty("README.md").GetProperty("content").GetString()
-        );
+        root.GetProperty("fileSummary").ValueKind.ShouldBe(JsonValueKind.Null);
+        root.GetProperty("directoryStructure").ValueKind.ShouldBe(JsonValueKind.Null);
+        root.GetProperty("files")
+            .GetProperty("README.md")
+            .GetProperty("language")
+            .GetString()
+            .ShouldBe("markdown");
+        root.GetProperty("files")
+            .GetProperty("README.md")
+            .GetProperty("content")
+            .GetString()!
+            .ShouldContain("1 | first");
     }
 }

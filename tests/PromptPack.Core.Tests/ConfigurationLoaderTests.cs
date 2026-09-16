@@ -18,8 +18,8 @@ public sealed class ConfigurationLoaderTests
                 cancellationToken
             );
             var config = await new ConfigurationLoader().LoadAsync(directory);
-            Assert.Equal("src/**", config.Include);
-            Assert.True(config.SecurityScan);
+            config.Include.ShouldBe("src/**");
+            config.SecurityScan.ShouldBe(true);
         }
         finally
         {
@@ -47,7 +47,7 @@ public sealed class ConfigurationLoaderTests
                 cancellationToken
             );
             var config = await new ConfigurationLoader().LoadAsync(directory, explicitPath);
-            Assert.Equal("custom/**", config.Include);
+            config.Include.ShouldBe("custom/**");
         }
         finally
         {

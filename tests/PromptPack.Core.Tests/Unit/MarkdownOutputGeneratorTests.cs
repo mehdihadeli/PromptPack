@@ -12,21 +12,14 @@ public class MarkdownOutputGeneratorTests
         {
             BaseDirectory = ".",
             ShowLineNumbers = true,
-            Files =
-            [
-                ProcessedFile.Create(
-                    "src/Program.cs",
-                    ".",
-                    "class Program\n{\n}\n"
-                ),
-            ],
+            Files = [ProcessedFile.Create("src/Program.cs", ".", "class Program\n{\n}\n")],
         };
 
         var output = new MarkdownOutputGenerator().Generate(context);
 
-        Assert.Contains("# Repository Context for AI Analysis", output);
-        Assert.Contains("## 📁 Repository Structure", output);
-        Assert.Contains("### 📝 src/Program.cs", output);
-        Assert.Contains("     1 | class Program", output);
+        output.ShouldContain("# Repository Context for AI Analysis");
+        output.ShouldContain("## 📁 Repository Structure");
+        output.ShouldContain("### 📝 src/Program.cs");
+        output.ShouldContain("     1 | class Program");
     }
 }

@@ -20,9 +20,9 @@ public class ProcessedFileTests
             "content"
         );
 
-        Assert.Equal($"src/{fileName}", processed.RelativePath);
-        Assert.Equal(expectedLanguage, processed.Language);
-        Assert.Equal("content", processed.Content);
-        Assert.Equal(7, processed.Size);
+        processed.RelativePath.ShouldBe($"src/{fileName}");
+        processed.Language.ShouldBe(expectedLanguage);
+        processed.Content.ShouldBe("content");
+        processed.Size.ShouldBe(7);
     }
 }

@@ -33,9 +33,9 @@ public sealed class FeatureOutputTests
 
         var output = generator.Generate(context);
 
-        Assert.Contains("Review header", output);
-        Assert.Contains("Follow these instructions", output);
-        Assert.Contains("src/Program.cs", output);
-        Assert.Contains("generic secret assignment", output);
+        output.ShouldContain("Review header");
+        output.ShouldContain("Follow these instructions");
+        output.ShouldContain("src/Program.cs");
+        output.ShouldContain("generic secret assignment");
     }
 }

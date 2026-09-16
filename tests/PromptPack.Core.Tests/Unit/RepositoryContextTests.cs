@@ -24,8 +24,8 @@ public class RepositoryContextTests
             ["README.md", "src/", "  Models/", "    A.cs", "  Z.cs", ""]
         );
 
-        Assert.Equal(expectedStructure, structure);
-        Assert.Equal(3, context.FileCount);
-        Assert.Equal(8, context.TotalSize);
+        structure.ShouldBe(expectedStructure);
+        context.FileCount.ShouldBe(3);
+        context.TotalSize.ShouldBe(8);
     }
 }

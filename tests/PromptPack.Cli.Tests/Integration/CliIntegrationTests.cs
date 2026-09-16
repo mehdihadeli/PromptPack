@@ -30,7 +30,7 @@ public class CliIntegrationTests
                     Arguments =
                         "run --project src/PromptPack.Cli -- pack \""
                         + directory.FullName
-                        + "\" -i \"**/*.md,README.md\" -e \"ignored/**\" -S -s json -f -D",
+                        + "\" -i \"**/*.md,README.md\" -e \"ignored/**\" -s -y json -f -d",
                     WorkingDirectory = FindRepositoryRoot(),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -48,13 +48,13 @@ public class CliIntegrationTests
             );
             await process.WaitForExitAsync(TestContext.Current.CancellationToken);
 
-            Assert.Equal(0, process.ExitCode);
-            Assert.Contains("\"files\"", standardOutput);
-            Assert.Contains("\"files\": null", standardOutput);
-            Assert.DoesNotContain("# Sample", standardOutput);
-            Assert.DoesNotContain("AI-Friendly Repository Context Packer", standardOutput);
-            Assert.DoesNotContain("Ignored", standardOutput);
-            Assert.True(string.IsNullOrWhiteSpace(standardError), standardError);
+            process.ExitCode.ShouldBe(0);
+            standardOutput.ShouldContain("\"files\"");
+            standardOutput.ShouldContain("\"files\": null");
+            standardOutput.ShouldNotContain("# Sample");
+            standardOutput.ShouldNotContain("AI-Friendly Repository Context Packer");
+            standardOutput.ShouldNotContain("Ignored");
+            string.IsNullOrWhiteSpace(standardError).ShouldBeTrue(standardError);
         }
         finally
         {
@@ -82,7 +82,7 @@ public class CliIntegrationTests
                     Arguments =
                         "run --project src/PromptPack.Cli -- pack \""
                         + directory.FullName
-                        + "\" --stdout --style json --no-directory-structure --no-file-summary",
+                        + "\" -s -y json -d -m",
                     WorkingDirectory = FindRepositoryRoot(),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -100,14 +100,12 @@ public class CliIntegrationTests
             );
             await process.WaitForExitAsync(TestContext.Current.CancellationToken);
 
-            Assert.Equal(0, process.ExitCode);
-            Assert.Contains("\"files\"", standardOutput);
-            Assert.Contains("README.md", standardOutput);
-            Assert.DoesNotContain("Pack Complete", standardOutput);
-            Assert.True(
-                string.IsNullOrWhiteSpace(standardError),
-                $"Expected no stderr output, got: {standardError}"
-            );
+            process.ExitCode.ShouldBe(0);
+            standardOutput.ShouldContain("\"files\"");
+            standardOutput.ShouldContain("README.md");
+            standardOutput.ShouldNotContain("Pack Complete");
+            string.IsNullOrWhiteSpace(standardError)
+                .ShouldBeTrue($"Expected no stderr output, got: {standardError}");
         }
         finally
         {
@@ -148,12 +146,12 @@ public class CliIntegrationTests
                 "selected.txt\n"
             );
 
-            Assert.Equal(0, result.ExitCode);
-            Assert.Contains("Review header", result.StandardOutput);
-            Assert.Contains("Inspect security implications.", result.StandardOutput);
-            Assert.Contains("generic secret assignment", result.StandardOutput);
-            Assert.Contains("selected.txt", result.StandardOutput);
-            Assert.DoesNotContain("not-selected.txt", result.StandardOutput);
+            result.ExitCode.ShouldBe(0);
+            result.StandardOutput.ShouldContain("Review header");
+            result.StandardOutput.ShouldContain("Inspect security implications.");
+            result.StandardOutput.ShouldContain("generic secret assignment");
+            result.StandardOutput.ShouldContain("selected.txt");
+            result.StandardOutput.ShouldNotContain("not-selected.txt");
         }
         finally
         {
@@ -183,14 +181,14 @@ public class CliIntegrationTests
                     + "\""
             );
 
-            Assert.Equal(0, result.ExitCode);
+            result.ExitCode.ShouldBe(0);
             var parts = Directory
                 .GetFiles(directory.FullName, "context.part*.txt")
                 .OrderBy(path => path)
                 .ToArray();
-            Assert.True(parts.Length > 1);
-            Assert.Equal("context.part001.txt", Path.GetFileName(parts[0]));
-            Assert.All(parts, part => Assert.True(new FileInfo(part).Length <= 128, part));
+            (parts.Length > 1).ShouldBeTrue();
+            Path.GetFileName(parts[0]).ShouldBe("context.part001.txt");
+            parts.ShouldAllBe(part => new FileInfo(part).Length <= 128, "part");
         }
         finally
         {

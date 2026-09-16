@@ -57,7 +57,7 @@ app.Configure(config =>
 
 try
 {
-    var writesToStdout = args.Contains("--stdout") || args.Contains("-S") || args.Contains("-");
+    var writesToStdout = args.Contains("--stdout") || args.Contains("-s") || args.Contains("-");
     if (!writesToStdout)
         SpectreExtensions.WriteHeader();
 

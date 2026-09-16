@@ -4,10 +4,10 @@ PromptPack packages a local repository into AI-friendly context. It collects fil
 
 ## Quick Start
 
-Run from the repository root without installing the tool:
+Run the installed tool from any directory:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- .
+promptpack
 ```
 
 By default, PromptPack copies the generated context to the system clipboard using [TextCopy](https://github.com/CopyText/TextCopy). It does not create an output file unless you request one.
@@ -15,20 +15,29 @@ By default, PromptPack copies the generated context to the system clipboard usin
 Show command help:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- --help
+promptpack --help
 ```
 
-PromptPack uses [Spectre.Console.Cli](https://spectreconsole.net/) for typed command settings, help, aliases, and validation. The default command is packing, so these forms are equivalent:
+PromptPack uses [Spectre.Console.Cli](https://spectreconsole.net/) for typed command settings, help, aliases, and validation. Running `promptpack` packs the current directory.
+
+## Install From NuGet (Default)
+
+Install the published tool globally:
 
 ```bash
-promptpack .
-promptpack pack .
-promptpack p .
+dotnet tool install --global PromptPack
+promptpack --help
 ```
 
-## Install As A .NET Tool
+Update an existing installation:
 
-Build and install the local tool package:
+```bash
+dotnet tool update --global PromptPack
+```
+
+### Install Locally After Cloning
+
+To install the version from a cloned repository, create the tool package and install it from the local package directory:
 
 ```bash
 dotnet pack src/PromptPack.Cli -c Release
@@ -36,16 +45,11 @@ dotnet tool install --global --add-source ./src/PromptPack.Cli/bin/Release Promp
 promptpack --help
 ```
 
-Update an existing local installation:
+For later local rebuilds, update the installed tool:
 
 ```bash
+dotnet pack src/PromptPack.Cli -c Release
 dotnet tool update --global --add-source ./src/PromptPack.Cli/bin/Release PromptPack
-```
-
-For a published package, install directly from NuGet:
-
-```bash
-dotnet tool install --global PromptPack
 ```
 
 ## Output Destinations
@@ -53,47 +57,47 @@ dotnet tool install --global PromptPack
 Copy to clipboard (default):
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- .
+promptpack
 ```
 
 Write to a file:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --output promptpack-output.xml
+promptpack -o promptpack-output.md
 ```
 
 Write directly to stdout:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --stdout --style markdown
+promptpack -s
 ```
 
 Copy output in addition to writing it to a file or stdout:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --output context.json --style json --copy
+promptpack -o context.json -y json -c
 ```
 
-Supported styles are `xml`, `markdown`, `json`, and `plain`. XML is the default.
+Supported styles are `xml`, `markdown`, `json`, and `plain`. Markdown is the default.
 
 ## File Selection
 
 Pack a specific directory:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- src
+promptpack src
 ```
 
 Include only matching comma-separated glob patterns:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --include "**/*.cs,README.md"
+promptpack -i "**/*.cs,README.md"
 ```
 
 Add exclude patterns (`--ignore` remains supported):
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --exclude "**/*.generated.cs,docs/**"
+promptpack -e "**/*.generated.cs,docs/**"
 ```
 
 PromptPack also applies common build-directory exclusions and patterns from `.gitignore`.
@@ -101,7 +105,7 @@ PromptPack also applies common build-directory exclusions and patterns from `.gi
 Read file paths from standard input when another command determines the selection:
 
 ```bash
-git ls-files '*.cs' '*.csproj' | dotnet run --project src/PromptPack.Cli -- . --stdin --style markdown --stdout
+git ls-files '*.cs' '*.csproj' | promptpack -q -s
 ```
 
 ## Configuration
@@ -130,12 +134,12 @@ splitOutput: 2MB
 
 | Option                           | Description                                                        |
 | -------------------------------- | ------------------------------------------------------------------ |
-| `-C, --compress`                 | Keep essential code structure while reducing implementation detail |
+| `-x, --compress`                 | Keep essential code structure while reducing implementation detail |
 | `-r, --remove-comments`          | Remove code comments                                               |
 | `-l, --remove-empty-lines`       | Remove blank lines from file contents                              |
 | `-n, --output-show-line-numbers` | Prefix generated file contents with line numbers                   |
-| `-F, --no-file-summary`          | Omit metadata summary                                              |
-| `-D, --no-directory-structure`   | Omit the directory tree                                            |
+| `-m, --no-file-summary`          | Omit metadata summary                                              |
+| `-d, --no-directory-structure`   | Omit the directory tree                                            |
 | `-f, --no-files`                 | Generate metadata without file contents                            |
 | `-t, --token-count`              | Display estimated total and per-file token counts                  |
 | `-b, --token-budget <number>`    | Report overflow and exit nonzero when output exceeds the budget    |
@@ -148,40 +152,40 @@ Additional context and safety options:
 | `-g, --config <path>`                    | Load an explicit JSON or YAML configuration file.                           |
 | `-q, --stdin`                            | Read one absolute or directory-relative file path per standard-input line.  |
 | `-k, --security-scan`                    | Report common private-key, cloud-key, token, and secret-assignment matches. |
-| `-H, --header-text <text>`               | Add custom header text to every generated format.                           |
-| `-P, --instruction-file-path <path>`     | Add instructions read from a file.                                          |
-| `-T, --include-full-directory-structure` | Include a separate tree of all non-ignored paths.                           |
+| `-h, --header-text <text>`               | Add custom header text to every generated format.                           |
+| `-p, --instruction-file-path <path>`     | Add instructions read from a file.                                          |
+| `-a, --include-full-directory-structure` | Include a separate tree of all non-ignored paths.                           |
 | `-z, --split-output <size>`              | Split file output into numbered parts; supports bytes, `KB`, and `MB`.      |
 
 Example compact context copied to the clipboard:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --compress --remove-comments --remove-empty-lines --style markdown
+promptpack -x -r -l -y markdown
 ```
 
 Example metadata-only JSON written to a file:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . --style json --no-files --no-directory-structure --output metadata.json
+promptpack -y json -f -d -o metadata.json
 ```
 
 Scan for likely secrets and keep the full repository tree alongside selected files:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . \
-	--security-scan \
-	--include-full-directory-structure \
-	--style markdown \
-	--output review-context.md
+promptpack \
+	-k \
+	-a \
+	-y markdown \
+	-o review-context.md
 ```
 
 Split a large output into `context.part001.json`, `context.part002.json`, and subsequent files:
 
 ```bash
-dotnet run --project src/PromptPack.Cli -- . \
-	--style json \
-	--split-output 2MB \
-	--output context.json
+promptpack \
+	-y json \
+	-z 2MB \
+	-o context.json
 ```
 
 ## Documentation

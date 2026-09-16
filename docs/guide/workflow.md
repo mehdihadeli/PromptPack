@@ -2,6 +2,8 @@
 
 Use PromptPack as a repeatable context preparation step before asking an AI tool to inspect code.
 
+The useful loop is: select the smallest relevant scope, choose the least destructive processing level, check size and safety, then choose the handoff format.
+
 ## 1. Start broad
 
 Create a baseline package so you can see what the collector includes:
@@ -65,6 +67,31 @@ git ls-files 'src/**/*.cs' | promptpack -q -y plain -s
 For larger handoffs, use `--split-output 2MB` with a file destination. PromptPack creates numbered sibling files. Use `--include-full-directory-structure` when the model needs to understand repository layout beyond the selected file contents.
 
 Before sharing a package, use `--security-scan` to surface common credential patterns and add task-specific framing with `--header-text` or `--instruction-file-path`.
+
+## 6. Give the package a concrete task
+
+The generated package is context, not a question. Pair it with a focused request:
+
+```text
+Review the selected code for correctness and security risks.
+Use file paths in every finding and separate confirmed bugs from suggestions.
+```
+
+For architecture work:
+
+```text
+Explain the request flow through this repository.
+Identify the entry point, core services, configuration boundary, and output boundary.
+```
+
+For testing work:
+
+```text
+Design focused tests for the selected behavior.
+Include normal cases, empty input, invalid configuration, and boundary conditions.
+```
+
+Keep the generated package local until you have reviewed its file selection and security findings.
 
 ## Repeatable checklist
 

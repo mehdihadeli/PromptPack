@@ -27,6 +27,8 @@ Example config:
 
 Run commands with the published `promptpack` .NET tool.
 
+PromptPack is a local CLI. It does not fetch remote repositories or upload generated context. Its normal interactive workflow copies Markdown to the clipboard; use `--output` for a file and `--stdout` for a pipeline.
+
 ## Usage
 
 ```text
@@ -37,12 +39,12 @@ The directory defaults to `.`.
 
 ## Output options
 
-| Option                                     | Purpose                                                                                               |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `-o, --output <path>`                      | Write output to a file. Use `-` for stdout. Clipboard is the default when no destination is selected. |
-| `-y, --style <xml\|markdown\|json\|plain>` | Select the output format. Defaults to `markdown`.                                                     |
-| `-s, --stdout`                             | Write the generated content to stdout.                                                                |
-| `-c, --copy`                               | Copy output to the system clipboard in addition to another destination.                               |
+| Option                                     | Purpose                                                                           |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| `-o, --output <path>`                      | Write output to a file. Clipboard is the default when no destination is selected. |
+| `-y, --style <xml\|markdown\|json\|plain>` | Select the output format. Defaults to `markdown`.                                 |
+| `-s, --stdout`                             | Write the generated content to stdout.                                            |
+| `-c, --copy`                               | Copy output to the system clipboard in addition to another destination.           |
 
 Examples:
 
@@ -51,6 +53,17 @@ promptpack -y xml -o context.xml
 promptpack -s
 promptpack -y json -o context.json -c
 ```
+
+### Output formats
+
+| Format     | Typical use                                              | Example                                |
+| ---------- | -------------------------------------------------------- | -------------------------------------- |
+| `markdown` | Reviewable context and direct AI prompts; default format | `promptpack -y markdown -o context.md` |
+| `xml`      | Explicit sections for structured consumers               | `promptpack -y xml -o context.xml`     |
+| `json`     | Programmatic inspection and automation                   | `promptpack -y json -o context.json`   |
+| `plain`    | Text-only shell pipelines                                | `promptpack -y plain -s`               |
+
+When no destination is supplied, PromptPack copies the generated output to the clipboard. `--copy` is additive: it copies output even when `--output` or `--stdout` is also supplied.
 
 ## File selection options
 
@@ -108,6 +121,33 @@ promptpack -y json -k -z 2MB -o context.json
 ## Exit behavior
 
 A successful pack returns exit code `0`. A token budget overflow returns exit code `2`. Unexpected failures are reported and return a nonzero exit code.
+
+## Scenario recipes
+
+Prepare a focused code-review package:
+
+```bash
+promptpack \
+  -i "src/**/*.cs,tests/**/*.cs" \
+  -e "**/*.generated.cs" \
+  -x -r -l -t \
+  -h "Review correctness and test coverage." \
+  -o review.md
+```
+
+Prepare a bounded CI handoff:
+
+```bash
+promptpack -y json -b 50000 -k -o context.json
+```
+
+The command returns `2` when the estimated output exceeds 50,000 tokens. A regular command failure returns another nonzero code.
+
+Prepare context from a tracked file list:
+
+```bash
+git ls-files 'src/**/*.cs' 'tests/**/*.cs' | promptpack -q -y plain -s > tracked.txt
+```
 
 ## Common recipes
 

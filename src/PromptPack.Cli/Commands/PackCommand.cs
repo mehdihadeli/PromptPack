@@ -23,7 +23,7 @@ public sealed class PackCommand(
     {
         string? stdoutOutput = null;
         var originalOutput = Console.Out;
-        if (options.Stdout || options.Output == "-")
+        if (options.Stdout)
             Console.SetOut(TextWriter.Null);
 
         try
@@ -137,7 +137,7 @@ public sealed class PackCommand(
                         }
 
                         // Handle output destinations
-                        if (options.Stdout || options.Output == "-")
+                        if (options.Stdout)
                         {
                             stdoutOutput = output;
                         }

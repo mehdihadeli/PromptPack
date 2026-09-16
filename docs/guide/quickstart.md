@@ -16,6 +16,8 @@ promptpack
 
 The command uses Markdown output and copies the result to the system clipboard. It does not create an output file unless you provide `-o` or `--output`.
 
+The generated Markdown contains a summary, repository structure, and selected file contents. Custom headers, instructions, and security findings appear when you request them.
+
 ## Choose an output destination
 
 Write a file:
@@ -36,7 +38,17 @@ Write JSON and copy the same content to the clipboard:
 promptpack -o context.json -y json -c
 ```
 
-Use `-o -` as another way to write to stdout.
+Choose plain text for a simple pipeline:
+
+```bash
+promptpack -y plain -s > context.txt
+```
+
+Choose XML when your downstream tool benefits from explicit sections:
+
+```bash
+promptpack -y xml -o context.xml
+```
 
 ## Narrow the files
 
@@ -84,6 +96,8 @@ promptpack -k -y json -o security-review.json
 ```
 
 The scan reports matches in output; it does not upload files or replace a dedicated secret scanner.
+
+Review the reported paths before sharing the generated package. The scan is a warning mechanism, not a redaction step.
 
 ## Add prompt context and split output
 
@@ -134,3 +148,5 @@ dotnet test --solution PromptPack.slnx
 ```
 
 See the complete option list in the [CLI reference](/reference/cli).
+
+For prompt-writing examples and the full documentation map, see the [workflow guide](/guide/workflow).

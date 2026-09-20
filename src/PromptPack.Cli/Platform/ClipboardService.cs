@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using PromptPack.Services.Interfaces;
 
-namespace PromptPack.Services;
+namespace PromptPack.Cli.Platform;
 
 public class ClipboardService(ILogger<ClipboardService> logger) : IClipboardService
 {

@@ -13,11 +13,10 @@
     <ItemGroup>
         <PackageVersion Include="Spectre.Console" Version="0.48.0" />
         <PackageVersion Include="Spectre.Console.Cli" Version="0.48.0" />
-        <PackageVersion Include="Glob" Version="1.1.8" />
         <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.1.25080.5" />
+        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.1.25080.5" />
         <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.1.25080.5" />
-        <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
-        <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.1" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0-preview.1.25080.5" />
         <PackageVersion Include="TextCopy" Version="6.2.1" />
         <PackageVersion Include="YamlDotNet" Version="16.3.0" />
         <PackageVersion Include="Nerdbank.GitVersioning" Version="3.10.94" />

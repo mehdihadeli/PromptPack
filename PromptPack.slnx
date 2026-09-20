@@ -1,4 +1,29 @@
 <Solution>
+  <Folder Name="/solution items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+    <Folder Name="/solution items/.github/">
+      <Folder Name="/solution items/.github/workflows/">
+        <File Path=".github/workflows/build-and-publish.yml" />
+        <File Path=".github/workflows/deploy-docs.yml" />
+        <File Path=".github/workflows/labeler.yml" />
+        <File Path=".github/workflows/release-drafter.yml" />
+      </Folder>
+    </Folder>
+    <Folder Name="/solution items/docs/">
+      <File Path="docs/index.md" />
+      <File Path="docs/reference/cli.md" />
+      <Folder Name="/solution items/docs/guide/">
+        <File Path="docs/guide/architecture.md" />
+        <File Path="docs/guide/development-architecture.md" />
+        <File Path="docs/guide/quickstart.md" />
+        <File Path="docs/guide/workflow.md" />
+      </Folder>
+    </Folder>
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/PromptPack.Cli/PromptPack.Cli.csproj" />
     <Project Path="src/PromptPack.Core/PromptPack.Core.csproj" />

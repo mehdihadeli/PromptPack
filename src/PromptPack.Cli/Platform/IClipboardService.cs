@@ -1,4 +1,4 @@
-﻿namespace PromptPack.Services.Interfaces;
+namespace PromptPack.Cli.Platform;
 
 public interface IClipboardService
 {

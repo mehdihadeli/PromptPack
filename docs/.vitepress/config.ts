@@ -22,6 +22,10 @@ export default defineConfig({
           items: [
             { text: "Quickstart", link: "/guide/quickstart" },
             { text: "Architecture", link: "/guide/architecture" },
+            {
+              text: "Development architecture",
+              link: "/guide/development-architecture",
+            },
             { text: "Workflow", link: "/guide/workflow" },
           ],
         },

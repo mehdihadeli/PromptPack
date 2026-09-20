@@ -7,7 +7,7 @@ namespace PromptPack.Core.Tests.Unit;
 public class XmlOutputGeneratorTests
 {
     [Fact]
-    public void Generate_ProducesFileMetadataAndPreservesMarkupAsContent()
+    public void Should_Produce_File_Metadata_And_Preserve_Markup_As_Content()
     {
         var context = new RepositoryContext
         {

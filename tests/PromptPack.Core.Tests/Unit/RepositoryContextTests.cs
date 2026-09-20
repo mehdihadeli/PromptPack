@@ -5,7 +5,7 @@ namespace PromptPack.Core.Tests.Unit;
 public class RepositoryContextTests
 {
     [Fact]
-    public void GetDirectoryStructure_ReturnsSortedIndentedTree()
+    public void Should_Return_Sorted_Indented_Directory_Tree()
     {
         var context = new RepositoryContext
         {

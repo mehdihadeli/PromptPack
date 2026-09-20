@@ -64,9 +64,9 @@ For shell pipelines, pass a newline-delimited file list through stdin:
 git ls-files 'src/**/*.cs' | promptpack -q -y plain -s
 ```
 
-For larger handoffs, use `--split-output 2MB` with a file destination. PromptPack creates numbered sibling files. Use `--include-full-directory-structure` when the model needs to understand repository layout beyond the selected file contents.
+For larger handoffs, use `--split-output 2MB` with a file destination. PromptPack creates numbered sibling files. Use `--full-tree` when the model needs to understand repository layout beyond the selected file contents. The older `--include-full-directory-structure` name remains supported.
 
-Before sharing a package, use `--security-scan` to surface common credential patterns and add task-specific framing with `--header-text` or `--instruction-file-path`.
+Before sharing a package, the default built-in security scan surfaces common credential patterns. To use Secretlint instead, install Node.js/npm, then run `promptpack --security-scanner secretlint`. PromptPack invokes `npx @secretlint/quick-start` and reports a clear runtime prerequisite error if `npx` is unavailable.
 
 ## 6. Give the package a concrete task
 

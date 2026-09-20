@@ -89,11 +89,13 @@ Provide one absolute or target-relative path per line. This works well with `git
 git ls-files '*.cs' | promptpack -q -s
 ```
 
-Enable the conservative security scan to report likely private keys, AWS access keys, GitHub tokens, and generic secret assignments:
+The built-in conservative security scan runs by default and requires no external installation. It reports likely private keys, AWS access keys, GitHub tokens, and generic secret assignments. To use Secretlint instead, install Node.js/npm and select it explicitly:
 
 ```bash
-promptpack -k -y json -o security-review.json
+promptpack --security-scanner secretlint -y json -o security-review.json
 ```
+
+PromptPack invokes Secretlint through `npx @secretlint/quick-start`; no project-local Secretlint installation is required.
 
 The scan reports matches in output; it does not upload files or replace a dedicated secret scanner.
 

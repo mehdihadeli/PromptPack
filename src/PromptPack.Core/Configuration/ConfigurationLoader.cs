@@ -78,12 +78,15 @@ public sealed class ConfigurationLoader : IConfigurationLoader
     {
         target.Include = source.Include ?? target.Include;
         target.Exclude = source.Exclude ?? target.Exclude;
+        target.UseGitignore = source.UseGitignore ?? target.UseGitignore;
+        target.UseDefaultPatterns = source.UseDefaultPatterns ?? target.UseDefaultPatterns;
         target.Compress = source.Compress ?? target.Compress;
         target.RemoveComments = source.RemoveComments ?? target.RemoveComments;
         target.RemoveEmptyLines = source.RemoveEmptyLines ?? target.RemoveEmptyLines;
         target.IncludeFullDirectoryStructure =
             source.IncludeFullDirectoryStructure ?? target.IncludeFullDirectoryStructure;
         target.SecurityScan = source.SecurityScan ?? target.SecurityScan;
+        target.SecurityScanner = source.SecurityScanner ?? target.SecurityScanner;
         target.HeaderText = source.HeaderText ?? target.HeaderText;
         target.InstructionFilePath = source.InstructionFilePath ?? target.InstructionFilePath;
         target.SplitOutput = source.SplitOutput ?? target.SplitOutput;

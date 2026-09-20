@@ -3,7 +3,7 @@ using PromptPack.Services.OutputGenerators;
 
 namespace PromptPack.Core.Tests.Unit;
 
-public sealed class FeatureOutputTests
+public sealed class OutputGeneratorFeatureTests
 {
     public static IEnumerable<object[]> Generators =>
         [
@@ -15,7 +15,7 @@ public sealed class FeatureOutputTests
 
     [Theory]
     [MemberData(nameof(Generators))]
-    public void Generate_RendersCustomContextMetadata(
+    public void Should_Render_Custom_Context_Metadata(
         PromptPack.Services.Interfaces.IOutputGenerator generator
     )
     {

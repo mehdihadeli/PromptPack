@@ -2,6 +2,10 @@
 
 PromptPack separates repository discovery, content shaping, and output generation into a small local pipeline.
 
+The source-project boundaries and contributor rules are documented in the
+[development architecture guide](./development-architecture.md). This page
+focuses on what happens when an end user runs PromptPack.
+
 ```mermaid
 flowchart LR
   A[Directory] --> B[FileCollector]
@@ -19,9 +23,9 @@ flowchart LR
 
 ## Collection phase
 
-`FileCollector` walks the selected directory and converts paths to repository-relative paths. It starts with common build-directory exclusions, adds patterns from `.gitignore`, then applies custom `--include` and `--exclude` patterns. The older `--ignore` name remains supported.
+`FileCollector` walks the selected directory and converts paths to repository-relative paths. It starts with common build-directory exclusions, adds patterns from `.gitignore` and `.ignore`, then applies custom `--include` and `--exclude` patterns. The older `--ignore` name remains supported. `--no-gitignore` and `--no-default-patterns` disable those sources independently.
 
-`ConfigurationLoader` merges global and repository configuration files before collection. `FileCollector` can also consume newline-delimited stdin paths or return a separate full tree for `--include-full-directory-structure`.
+`ConfigurationLoader` merges global and repository configuration files before collection. `StdinPathReader` reads newline-delimited paths in the CLI and asks `FileCollector` to filter them. `FileCollector` can also return a separate full tree for `--full-tree` (`--include-full-directory-structure` remains supported as an alias).
 
 An include pattern must match before a file can enter the pipeline. An ignore match removes it afterward. Patterns are comma-separated and use the CLI's glob matching rules.
 
@@ -50,7 +54,7 @@ Compression is intentionally structural rather than semantic. It keeps declarati
 - A separate full directory structure
 - Security findings from the optional scanner
 
-`SecurityScanner` uses conservative local pattern matching for common private keys, AWS access keys, GitHub tokens, and generic secret assignments. It reports findings for review and does not transmit repository data.
+`SecurityScanner` is built into the .NET application and uses conservative local pattern matching for common private keys, AWS access keys, GitHub tokens, and generic secret assignments. It runs by default and requires no external runtime. The optional Secretlint adapter invokes `npx @secretlint/quick-start` when Node.js/npm is available. Findings are reported for review and do not remove matching files from the package.
 
 Four generators implement the same context contract:
 
@@ -71,4 +75,4 @@ When `--split-output` is supplied with a file destination, the generated text is
 
 ## Data boundaries
 
-PromptPack is a local packaging tool. It does not upload repository contents or retrieve live external context. Clipboard behavior depends on the host environment and is handled by the `TextCopy` package.
+PromptPack is a local packaging tool. It does not upload repository contents or retrieve live external context. Clipboard behavior depends on the host environment and is handled by the CLI's `ClipboardService`, which uses the `TextCopy` package.

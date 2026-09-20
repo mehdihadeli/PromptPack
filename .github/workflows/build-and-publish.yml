@@ -33,8 +33,16 @@ jobs:
       - name: Build
         run: dotnet build PromptPack.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test --solution PromptPack.slnx --configuration Release --no-restore
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Test Core
+        run: dotnet test --project tests/PromptPack.Core.Tests/PromptPack.Core.Tests.csproj --configuration Release --no-restore
+
+      - name: Test CLI
+        run: dotnet test --project tests/PromptPack.Cli.Tests/PromptPack.Cli.Tests.csproj --configuration Release --no-restore
 
   publish:
     name: Publish NuGet package

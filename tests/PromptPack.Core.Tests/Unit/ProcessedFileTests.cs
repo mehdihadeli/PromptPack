@@ -9,7 +9,7 @@ public class ProcessedFileTests
     [InlineData("sample.ts", "typescript")]
     [InlineData("sample.md", "markdown")]
     [InlineData("sample.unknown", "plaintext")]
-    public void Create_InfersLanguageAndNormalizesRelativePath(
+    public void Should_Infers_Language_And_Normalize_Relative_Path(
         string fileName,
         string expectedLanguage
     )

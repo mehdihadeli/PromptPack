@@ -6,7 +6,7 @@ namespace PromptPack.Core.Tests.Integration;
 public class ContentProcessorTests
 {
     [Fact]
-    public async Task ProcessFileAsync_RemovesCommentsAndEmptyLines()
+    public async Task Should_Remove_Comments_And_Empty_Lines()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-tests-");
         try
@@ -33,7 +33,7 @@ public class ContentProcessorTests
     }
 
     [Fact]
-    public async Task ProcessFileAsync_CompressesMethodBodiesToStructuralSummary()
+    public async Task Should_Compress_Method_Bodies_To_Structural_Summary()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-tests-");
         try

@@ -5,7 +5,7 @@ namespace PromptPack.Cli.Tests.Unit;
 public class PackSettingsTests
 {
     [Fact]
-    public void Defaults_TargetCurrentDirectoryAndMarkdownOutput()
+    public void Should_Default_To_Current_Directory_And_Markdown_Output()
     {
         var settings = new PackSettings();
 
@@ -28,15 +28,21 @@ public class PackSettingsTests
         settings.Verbose.ShouldBeFalse();
         settings.Config.ShouldBeNull();
         settings.Stdin.ShouldBeFalse();
-        settings.SecurityScan.ShouldBeFalse();
+        settings.SecurityScan.ShouldBeNull();
+        settings.SecurityScanner.ShouldBeNull();
         settings.HeaderText.ShouldBeNull();
         settings.InstructionFilePath.ShouldBeNull();
         settings.IncludeFullDirectoryStructure.ShouldBeFalse();
         settings.SplitOutput.ShouldBeNull();
+        settings.Init.ShouldBeFalse();
+        settings.NoGitignore.ShouldBeFalse();
+        settings.NoDefaultPatterns.ShouldBeFalse();
+        settings.Remote.ShouldBeNull();
+        settings.RemoteBranch.ShouldBeNull();
     }
 
     [Fact]
-    public void PropertiesRepresentCompletePackRequest()
+    public void Should_Represent_Complete_Pack_Request()
     {
         var settings = new PackSettings
         {
@@ -60,10 +66,16 @@ public class PackSettingsTests
             Config = "promptpack.config.yaml",
             Stdin = true,
             SecurityScan = true,
+            SecurityScanner = "secretlint",
             HeaderText = "Review this",
             InstructionFilePath = "instructions.md",
             IncludeFullDirectoryStructure = true,
             SplitOutput = "2MB",
+            Init = true,
+            NoGitignore = true,
+            NoDefaultPatterns = true,
+            Remote = "https://github.com/org/repo.git",
+            RemoteBranch = "main",
         };
 
         settings.Directory.ShouldBe("src");
@@ -83,10 +95,16 @@ public class PackSettingsTests
         settings.Verbose.ShouldBeTrue();
         settings.Config.ShouldBe("promptpack.config.yaml");
         settings.Stdin.ShouldBeTrue();
-        settings.SecurityScan.ShouldBeTrue();
+        settings.SecurityScan.ShouldBe(true);
+        settings.SecurityScanner.ShouldBe("secretlint");
         settings.HeaderText.ShouldBe("Review this");
         settings.InstructionFilePath.ShouldBe("instructions.md");
         settings.IncludeFullDirectoryStructure.ShouldBeTrue();
         settings.SplitOutput.ShouldBe("2MB");
+        settings.Init.ShouldBeTrue();
+        settings.NoGitignore.ShouldBeTrue();
+        settings.NoDefaultPatterns.ShouldBeTrue();
+        settings.Remote.ShouldBe("https://github.com/org/repo.git");
+        settings.RemoteBranch.ShouldBe("main");
     }
 }

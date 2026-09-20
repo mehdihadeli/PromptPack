@@ -27,16 +27,19 @@ public class FileCollector : IFileCollector
     public async Task<IReadOnlyList<string>> CollectFilesAsync(
         string directory,
         string? includePatterns,
-        string? ignorePatterns
+        string? ignorePatterns,
+        bool useGitignore = true,
+        bool useDefaultPatterns = true
     )
     {
         _logger.LogInformation("Collecting files from {Directory}", directory);
 
-        var ignoreSet = new HashSet<string>(DefaultIgnorePatterns);
+        var ignoreSet = useDefaultPatterns ? new HashSet<string>(DefaultIgnorePatterns) : [];
         var includeSet = new HashSet<string> { "**/*" };
 
-        // Add .gitignore patterns
-        await AddGitignorePatternsAsync(directory, ignoreSet);
+        // Add repository ignore files
+        if (useGitignore)
+            await AddGitignorePatternsAsync(directory, ignoreSet);
 
         // Add custom patterns
         if (!string.IsNullOrEmpty(ignorePatterns))
@@ -74,38 +77,40 @@ public class FileCollector : IFileCollector
         return filteredFiles;
     }
 
-    public async Task<IReadOnlyList<string>> CollectPathsFromStdinAsync(
+    public async Task<IReadOnlyList<string>> FilterPathsAsync(
         string directory,
         string? includePatterns,
-        string? ignorePatterns
+        string? ignorePatterns,
+        IEnumerable<string> paths,
+        bool useGitignore = true,
+        bool useDefaultPatterns = true
     )
     {
-        var ignoreSet = new HashSet<string>(DefaultIgnorePatterns);
-        await AddGitignorePatternsAsync(directory, ignoreSet);
+        var ignoreSet = useDefaultPatterns ? new HashSet<string>(DefaultIgnorePatterns) : [];
+        if (useGitignore)
+            await AddGitignorePatternsAsync(directory, ignoreSet);
         if (!string.IsNullOrWhiteSpace(ignorePatterns))
             foreach (var pattern in ignorePatterns.Split(','))
                 ignoreSet.Add(pattern.Trim());
 
-        var paths = new List<string>();
-        string? line;
-        while ((line = await Console.In.ReadLineAsync()) is not null)
-        {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-            var path = Path.GetFullPath(line.Trim(), directory);
-            if (File.Exists(path))
-                paths.Add(path);
-        }
-        return Filter(paths, directory, includePatterns, string.Join(',', ignoreSet));
+        return Filter(
+            paths.Where(File.Exists),
+            directory,
+            includePatterns,
+            string.Join(',', ignoreSet)
+        );
     }
 
     public async Task<IReadOnlyList<string>> CollectDirectoryPathsAsync(
         string directory,
-        string? ignorePatterns
+        string? ignorePatterns,
+        bool useGitignore = true,
+        bool useDefaultPatterns = true
     )
     {
-        var ignoreSet = new HashSet<string>(DefaultIgnorePatterns);
-        await AddGitignorePatternsAsync(directory, ignoreSet);
+        var ignoreSet = useDefaultPatterns ? new HashSet<string>(DefaultIgnorePatterns) : [];
+        if (useGitignore)
+            await AddGitignorePatternsAsync(directory, ignoreSet);
         if (!string.IsNullOrWhiteSpace(ignorePatterns))
             foreach (var pattern in ignorePatterns.Split(','))
                 ignoreSet.Add(pattern.Trim());
@@ -142,10 +147,13 @@ public class FileCollector : IFileCollector
 
     private async Task AddGitignorePatternsAsync(string directory, HashSet<string> ignoreSet)
     {
-        var gitignorePath = Path.Combine(directory, ".gitignore");
-        if (File.Exists(gitignorePath))
+        foreach (var fileName in new[] { ".gitignore", ".ignore" })
         {
-            var lines = await File.ReadAllLinesAsync(gitignorePath);
+            var path = Path.Combine(directory, fileName);
+            if (!File.Exists(path))
+                continue;
+
+            var lines = await File.ReadAllLinesAsync(path);
             foreach (var line in lines)
             {
                 var trimmed = line.Trim();

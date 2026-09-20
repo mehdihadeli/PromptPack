@@ -5,7 +5,7 @@ namespace PromptPack.Core.Tests.Unit;
 public sealed class SecurityScannerTests
 {
     [Fact]
-    public async Task ScanAsync_FindsKnownCredentialPatterns()
+    public async Task Should_Find_Known_Credential_Patterns()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-security-");
         try
@@ -30,7 +30,7 @@ public sealed class SecurityScannerTests
     }
 
     [Fact]
-    public async Task ScanAsync_FindsGenericSecretAssignmentButIgnoresShortValues()
+    public async Task Should_Find_Generic_Secret_Assignment_But_Ignore_Short_Values()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-security-");
         try

@@ -7,7 +7,7 @@ namespace PromptPack.Core.Tests.Unit;
 public class JsonOutputGeneratorTests
 {
     [Fact]
-    public void Generate_ProducesStructuredJsonWithLineNumbers()
+    public void Should_Produce_Structured_Json_With_Line_Numbers()
     {
         var context = new RepositoryContext
         {

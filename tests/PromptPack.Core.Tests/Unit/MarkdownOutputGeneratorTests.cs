@@ -6,7 +6,7 @@ namespace PromptPack.Core.Tests.Unit;
 public class MarkdownOutputGeneratorTests
 {
     [Fact]
-    public void Generate_AddsLineNumbersAndRepositorySections()
+    public void Should_Add_Line_Numbers_And_Repository_Sections()
     {
         var context = new RepositoryContext
         {

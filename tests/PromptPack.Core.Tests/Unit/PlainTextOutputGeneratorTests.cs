@@ -6,7 +6,7 @@ namespace PromptPack.Core.Tests.Unit;
 public class PlainTextOutputGeneratorTests
 {
     [Fact]
-    public void Generate_WhenFilesAreExcludedOmitsFileSection()
+    public void Should_Omit_File_Section_When_Files_Are_Excluded()
     {
         var context = new RepositoryContext
         {

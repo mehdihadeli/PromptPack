@@ -3,13 +3,12 @@ using PromptPack.Services;
 
 namespace PromptPack.Core.Tests.Integration;
 
-public sealed class FileCollectorFeatureTests
+public sealed class FileCollectorFilterTests
 {
     [Fact]
-    public async Task CollectPathsFromStdinAsync_AppliesIncludesIgnoresAndDefaultDirectories()
+    public async Task Should_Apply_Includes_Ignores_And_Default_Directories()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-stdin-");
-        var originalInput = Console.In;
         try
         {
             Directory.CreateDirectory(Path.Combine(directory.FullName, "src"));
@@ -30,12 +29,16 @@ public sealed class FileCollectorFeatureTests
                 TestContext.Current.CancellationToken
             );
 
-            Console.SetIn(
-                new StringReader("src/Program.cs\nsrc/Notes.txt\nbin/generated.cs\nmissing.cs\n")
-            );
+            var paths = new[]
+            {
+                Path.Combine(directory.FullName, "src", "Program.cs"),
+                Path.Combine(directory.FullName, "src", "Notes.txt"),
+                Path.Combine(directory.FullName, "bin", "generated.cs"),
+                Path.Combine(directory.FullName, "missing.cs"),
+            };
             var files = await new FileCollector(
                 NullLogger<FileCollector>.Instance
-            ).CollectPathsFromStdinAsync(directory.FullName, "**/*.cs", null);
+            ).FilterPathsAsync(directory.FullName, "**/*.cs", null, paths);
 
             files
                 .Select(path => Path.GetRelativePath(directory.FullName, path).Replace('\\', '/'))
@@ -43,13 +46,12 @@ public sealed class FileCollectorFeatureTests
         }
         finally
         {
-            Console.SetIn(originalInput);
             directory.Delete(true);
         }
     }
 
     [Fact]
-    public async Task CollectDirectoryPathsAsync_ReturnsNonIgnoredFullTree()
+    public async Task Should_Return_Non_Ignored_Full_Tree()
     {
         var directory = Directory.CreateTempSubdirectory("promptpack-tree-");
         try

@@ -52,25 +52,43 @@ public sealed class PackSettings : CommandSettings
     [CommandOption("-t|--token-count")]
     public bool TokenCount { get; set; }
 
-    [CommandOption("-v|--verbose")]
+    [CommandOption("-w|--verbose")]
     public bool Verbose { get; set; }
 
     [CommandOption("-g|--config")]
     public string? Config { get; set; }
 
+    [CommandOption("--init")]
+    public bool Init { get; set; }
+
+    [CommandOption("--no-gitignore")]
+    public bool NoGitignore { get; set; }
+
+    [CommandOption("--no-default-patterns")]
+    public bool NoDefaultPatterns { get; set; }
+
+    [CommandOption("--remote")]
+    public string? Remote { get; set; }
+
+    [CommandOption("--remote-branch")]
+    public string? RemoteBranch { get; set; }
+
     [CommandOption("-q|--stdin")]
     public bool Stdin { get; set; }
 
     [CommandOption("-k|--security-scan")]
-    public bool SecurityScan { get; set; }
+    public bool? SecurityScan { get; set; }
 
-    [CommandOption("-h|--header-text")]
+    [CommandOption("--security-scanner")]
+    public string? SecurityScanner { get; set; }
+
+    [CommandOption("-j|--header-text")]
     public string? HeaderText { get; set; }
 
     [CommandOption("-p|--instruction-file-path")]
     public string? InstructionFilePath { get; set; }
 
-    [CommandOption("-a|--include-full-directory-structure")]
+    [CommandOption("-a|--full-tree|--include-full-directory-structure")]
     public bool IncludeFullDirectoryStructure { get; set; }
 
     [CommandOption("-z|--split-output")]

@@ -37,7 +37,7 @@ jobs:
       - name: Calculate release version
         id: version
         shell: bash
-        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v NuGetPackageVersion)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)" >> "$GITHUB_OUTPUT"
 
       - name: Update Release Draft
         uses: release-drafter/release-drafter@v7

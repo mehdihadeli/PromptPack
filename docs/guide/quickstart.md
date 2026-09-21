@@ -1,12 +1,21 @@
 # Quickstart
 
-PromptPack packages a local directory into AI-friendly context. Install the published .NET tool, then run it with `promptpack`.
+PromptPack packages a local directory into AI-friendly context. Install the standalone release executable, then run it with `promptpack`.
 
 ## Prerequisites
 
-- .NET SDK 10
 - A repository or directory to pack
 - Clipboard support when using the default output destination
+
+## Install
+
+On Linux or macOS, install or update the published tool with:
+
+```bash
+curl -fsSL https://github.com/mehdihadeli/PromptPack/install.sh | bash
+```
+
+The script downloads a self-contained executable and does not require NuGet, the .NET SDK, or `dotnet tool`. Windows users can install the .NET global tool with `dotnet tool install --global PromptPack`, or use a release executable when one is published for their platform.
 
 ## Pack the current directory
 

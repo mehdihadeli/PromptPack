@@ -20,7 +20,17 @@ PromptPack follows a local context-preparation pipeline:
 
 ## 🚀 Quick Start
 
-Install the tool:
+Install PromptPack:
+
+On Linux or macOS, use the standalone installer. It downloads the latest release and does not require NuGet, the .NET SDK, or `dotnet tool`:
+
+```bash
+curl -fsSL https://github.com/mehdihadeli/PromptPack/install.sh | bash
+```
+
+Then open a new terminal, or add `~/.local/bin` to your `PATH` if the `promptpack` command is not found.
+
+If you already have the .NET SDK installed, you can use the global tool instead:
 
 ```bash
 dotnet tool install --global PromptPack
@@ -160,7 +170,15 @@ The detailed project tree and dependency rules are documented in the
 
 ## 📥 Installation
 
-Update an existing global installation:
+On Linux or macOS, install or update PromptPack directly from GitHub:
+
+```bash
+curl -fsSL https://github.com/mehdihadeli/PromptPack/install.sh | bash
+```
+
+The script downloads a self-contained executable from the latest GitHub release. It does not require NuGet, the .NET SDK, or `dotnet tool` on the consumer system.
+
+For systems with the .NET SDK, install or update the NuGet global tool instead:
 
 ```bash
 dotnet tool update --global PromptPack

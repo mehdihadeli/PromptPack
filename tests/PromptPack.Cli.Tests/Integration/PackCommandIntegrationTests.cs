@@ -128,6 +128,98 @@ public class PackCommandIntegrationTests
         }
     }
 
+#pragma warning disable xUnit1051
+    [Fact]
+    public async Task Should_Copy_Default_And_Explicit_Copy_Output_To_Clipboard()
+    {
+        const string clipboardSentinel = "PromptPack clipboard test sentinel";
+        var directory = Directory.CreateTempSubdirectory("promptpack-clipboard-tests-");
+        string? originalClipboard = null;
+        var outputPath = Path.Combine(
+            Path.GetTempPath(),
+            $"promptpack-clipboard-output-{Guid.NewGuid():N}.txt"
+        );
+
+        try
+        {
+            try
+            {
+                originalClipboard = await TextCopy.ClipboardService.GetTextAsync();
+                await TextCopy.ClipboardService.SetTextAsync(clipboardSentinel);
+            }
+            catch (Exception exception)
+            {
+                Assert.Skip(
+                    $"Clipboard is unavailable in this test environment: {exception.Message}"
+                );
+            }
+
+            const string marker = "clipboard output marker";
+            await File.WriteAllTextAsync(
+                Path.Combine(directory.FullName, "README.md"),
+                marker,
+                TestContext.Current.CancellationToken
+            );
+
+            var defaultResult = await RunCliAsync(
+                directory.FullName,
+                $"\"{directory.FullName}\" --style plain --no-file-summary --no-directory-structure"
+            );
+
+            defaultResult.ExitCode.ShouldBe(0);
+            var defaultClipboard = await TextCopy.ClipboardService.GetTextAsync();
+            defaultClipboard.ShouldNotBeNull();
+            defaultClipboard!.ShouldContain(marker);
+
+            await TextCopy.ClipboardService.SetTextAsync(clipboardSentinel);
+            var fileOnlyResult = await RunCliAsync(
+                directory.FullName,
+                $"\"{directory.FullName}\" --style plain --no-file-summary --no-directory-structure --output \"{outputPath}\""
+            );
+
+            fileOnlyResult.ExitCode.ShouldBe(0);
+            var fileOutput = await File.ReadAllTextAsync(
+                outputPath,
+                TestContext.Current.CancellationToken
+            );
+            (await TextCopy.ClipboardService.GetTextAsync()).ShouldBe(clipboardSentinel);
+
+            var explicitCopyResult = await RunCliAsync(
+                directory.FullName,
+                $"\"{directory.FullName}\" --style plain --no-file-summary --no-directory-structure --output \"{outputPath}\" --copy"
+            );
+
+            explicitCopyResult.ExitCode.ShouldBe(0);
+            var copiedFileOutput = await TextCopy.ClipboardService.GetTextAsync();
+            copiedFileOutput.ShouldBe(fileOutput);
+
+            var stdoutResult = await RunCliAsync(
+                directory.FullName,
+                $"\"{directory.FullName}\" --style plain --no-file-summary --no-directory-structure --stdout"
+            );
+
+            stdoutResult.ExitCode.ShouldBe(0);
+            var stdoutClipboard = await TextCopy.ClipboardService.GetTextAsync();
+            stdoutClipboard.ShouldBe(fileOutput);
+        }
+        finally
+        {
+            if (originalClipboard is not null)
+            {
+                try
+                {
+                    await TextCopy.ClipboardService.SetTextAsync(originalClipboard);
+                }
+                catch { }
+            }
+
+            directory.Delete(true);
+            if (File.Exists(outputPath))
+                File.Delete(outputPath);
+        }
+    }
+#pragma warning restore xUnit1051
+
     [Fact]
     public async Task Should_Support_Metadata_Security_And_Stdin_Options()
     {

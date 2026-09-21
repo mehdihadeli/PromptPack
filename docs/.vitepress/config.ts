@@ -27,6 +27,7 @@ export default defineConfig({
               link: "/guide/development-architecture",
             },
             { text: "Workflow", link: "/guide/workflow" },
+            { text: "Versioning with NBGV", link: "/guide/versioning" },
           ],
         },
         {

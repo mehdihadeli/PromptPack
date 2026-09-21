@@ -65,7 +65,7 @@ A public release ref does not remove or add a prerelease suffix. It controls whe
 Choose the next release line and change the committed version through a pull request:
 
 ```bash
-./release-version.sh prepare-preview 1.0.0 1
+./release-version.sh prepare-preview 1.0.0
 git add version.json
 git commit -m "Start 1.0 preview"
 ```
@@ -79,7 +79,8 @@ PR 1: version.json -> 1.0.0-preview.1
   feature A, bug fix, and documentation merge
   draft remains v1.0.0-preview.1
 
-PR 2: version.json -> 1.0.0-preview.2
+PR 2: run `./release-version.sh prepare-preview 1.0.0`
+  version.json -> 1.0.0-preview.2
   draft becomes v1.0.0-preview.2
 ```
 
@@ -97,8 +98,13 @@ you intentionally publish the next preview package.
 Check the calculated version at any point with:
 
 ```bash
-nbgv get-version
+nbgv get-version -v SemVer2
 ```
+
+Use `SemVer2` as the canonical release version everywhere. It preserves the
+Microsoft-style prerelease form, for example `1.0.0-preview.1`. Do not use
+`NuGetPackageVersion` for Release Drafter metadata because NBGV may normalize
+that value to `1.0.0-preview-0001`.
 
 A topic branch that is not listed in `publicReleaseRefSpec` may include a commit ID. That keeps packages from separate pull requests unique before they merge into `main`.
 
@@ -107,7 +113,7 @@ A topic branch that is not listed in `publicReleaseRefSpec` may include a commit
 When the code is ready for stabilization, create a pull request that changes the release intent:
 
 ```bash
-./release-version.sh prepare-rc 1.0.0 1
+./release-version.sh prepare-rc 1.0.0
 git add version.json
 git commit -m "Begin 1.0 release candidate"
 ```
@@ -124,7 +130,7 @@ git push origin <tag-created-by-nbgv>
 If another RC is required, merge the required fixes and create a new version PR:
 
 ```bash
-./release-version.sh prepare-rc 1.0.0 2
+./release-version.sh prepare-rc 1.0.0
 ```
 
 ## Publish a stable release
@@ -150,7 +156,7 @@ The resulting tag should be `v1.0.0`. The tag records which commit was released 
 After stable publication, advance `main` to the next development line before accepting work for it:
 
 ```bash
-./release-version.sh prepare-preview 1.1.0 1
+./release-version.sh prepare-preview 1.1.0
 git add version.json
 git commit -m "Start 1.1 preview"
 ```

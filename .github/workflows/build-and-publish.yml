@@ -73,7 +73,7 @@ jobs:
       - name: Calculate release version
         id: version
         shell: bash
-        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v NuGetPackageVersion)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)" >> "$GITHUB_OUTPUT"
 
       - name: Pack
         run: dotnet pack src/PromptPack.Cli/PromptPack.Cli.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true

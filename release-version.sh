@@ -5,14 +5,14 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./release-version.sh prepare-preview <major.minor.patch> <number>
-  ./release-version.sh prepare-rc <major.minor.patch> <number>
+  ./release-version.sh prepare-preview <major.minor.patch>
+  ./release-version.sh prepare-rc <major.minor.patch>
   ./release-version.sh prepare-stable <major.minor.patch>
   ./release-version.sh tag
 
 Examples:
-  ./release-version.sh prepare-preview 1.0.0 2
-  ./release-version.sh prepare-rc 1.0.0 1
+  ./release-version.sh prepare-preview 1.0.0
+  ./release-version.sh prepare-rc 1.0.0
   ./release-version.sh prepare-stable 1.0.0
   ./release-version.sh tag
 EOF
@@ -28,22 +28,41 @@ if ! command -v nbgv >/dev/null 2>&1; then
   exit 1
 fi
 
-release_version() {
+next_prerelease_number() {
   local base_version="$1"
-  local suffix="$2"
+  local identifier="$2"
+  local current_version
+  local current_number
 
-  nbgv set-version "${base_version}-${suffix}"
-  echo "Updated version.json to ${base_version}-${suffix}. Open a pull request with this change."
+  current_version="$(sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' version.json | head -n 1)"
+  current_number="$(sed -nE "s/^${base_version}-${identifier}\.([0-9]+)$/\1/p" <<< "$current_version")"
+
+  if [[ -n "$current_number" ]]; then
+    echo $((current_number + 1))
+  else
+    echo 1
+  fi
 }
+
+prepare_prerelease() {
+  local base_version="$1"
+  local identifier="$2"
+  local number
+
+  number="$(next_prerelease_number "$base_version" "$identifier")"
+  nbgv set-version "${base_version}-${identifier}.${number}"
+  echo "Updated version.json to ${base_version}-${identifier}.${number}. Open a pull request with this change."
+}
+
 
 case "$1" in
   prepare-preview)
-    [[ $# -eq 3 ]] || { usage; exit 1; }
-    release_version "$2" "preview.$3"
+    [[ $# -eq 2 ]] || { usage; exit 1; }
+    prepare_prerelease "$2" "preview"
     ;;
   prepare-rc)
-    [[ $# -eq 3 ]] || { usage; exit 1; }
-    release_version "$2" "rc.$3"
+    [[ $# -eq 2 ]] || { usage; exit 1; }
+    prepare_prerelease "$2" "rc"
     ;;
   prepare-stable)
     [[ $# -eq 2 ]] || { usage; exit 1; }

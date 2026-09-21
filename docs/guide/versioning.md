@@ -14,30 +14,33 @@ This guide describes the single-branch GitHub Flow policy:
 A release moves through these states:
 
 ```text
-11.0-preview.N -> 11.0-rc.N -> 11.0.0
+1.0.0-preview.N -> 1.0.0-rc.N -> 1.0.0
 ```
 
 The suffix is committed in `version.json`. A tag does not convert a preview into an RC or an RC into a stable version.
 
-| State                | GitHub Flow action                              | Example                            |
-| -------------------- | ----------------------------------------------- | ---------------------------------- |
-| Start development    | Open and merge a PR that changes `version.json` | `11.0-preview`                     |
-| Continue development | Merge ordinary PRs                              | `11.0-preview.1`, `11.0-preview.2` |
-| Start stabilization  | Open and merge a PR that changes `version.json` | `11.0-rc`                          |
-| Publish RC           | Tag the approved RC commit                      | `v11.0.0-rc.1`                     |
-| Declare stable       | Open and merge a PR that changes `version.json` | `11.0`                             |
-| Publish stable       | Tag the approved stable commit                  | `v11.0.0`                          |
+| State                | GitHub Flow action                              | Example                        |
+| -------------------- | ----------------------------------------------- | ------------------------------ |
+| Start development    | Open and merge a PR that changes `version.json` | `1.0.0-preview.1`              |
+| Continue development | Merge ordinary PRs                              | Same preview version and draft |
+| Publish next preview | Open and merge a version PR                     | `1.0.0-preview.2`              |
+| Start stabilization  | Open and merge a version PR                     | `1.0.0-rc.1`                   |
+| Publish RC           | Tag the approved RC commit                      | `v1.0.0-rc.1`                  |
+| Declare stable       | Open and merge a version PR                     | `1.0.0`                        |
+| Publish stable       | Tag the approved stable commit                  | `v1.0.0`                       |
 
-The exact version height is based on Git history, not the number of pull requests. Squash merges, merge commits, rebases, and cherry-picks can produce different heights. Do not manually edit `version.json` for every preview number.
+NBGV still uses Git history for assembly and informational metadata, but the
+public preview number is explicitly committed in `version.json`. It is not a
+pull-request counter.
 
 ## Configure `version.json`
 
-Use a prerelease base version while the release is in development:
+Use an explicit three-part prerelease version while the release is in development:
 
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/main/src/NerdBank.GitVersioning/version.schema.json",
-  "version": "11.0-preview",
+  "version": "1.0.0-preview.1",
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
     "^refs/tags/v\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
@@ -53,7 +56,7 @@ Use a prerelease base version while the release is in development:
 }
 ```
 
-`publicReleaseRefSpec` makes builds from `main` and version tags public release builds. The tag expression includes both stable tags, such as `v11.0.0`, and prerelease tags, such as `v11.0.0-rc.1`.
+`publicReleaseRefSpec` makes builds from `main` and version tags public release builds. The tag expression includes both stable tags, such as `v1.0.0`, and prerelease tags, such as `v1.0.0-rc.1`.
 
 A public release ref does not remove or add a prerelease suffix. It controls whether NBGV includes the Git commit ID in the calculated public package version.
 
@@ -62,42 +65,34 @@ A public release ref does not remove or add a prerelease suffix. It controls whe
 Choose the next release line and change the committed version through a pull request:
 
 ```bash
-nbgv set-version 11.0-preview
+./release-version.sh prepare-preview 1.0.0 1
 git add version.json
-git commit -m "Start 11.0 preview"
+git commit -m "Start 1.0 preview"
 ```
 
-After this change reaches `main`, ordinary pull requests do not need to modify
-`version.json`. NBGV calculates a new version from the number of commits after
-the version-change commit. For example, assuming squash merges and no extra
-commits, the history could look like this:
+After this change reaches `main`, ordinary pull requests do not modify
+`version.json`. They are included in the same rolling Release Drafter draft.
+When you want to publish another preview package, create a new version PR:
 
 ```text
-Commit A: version.json says 11.0-preview
-          main -> 11.0-preview.0
+PR 1: version.json -> 1.0.0-preview.1
+  feature A, bug fix, and documentation merge
+  draft remains v1.0.0-preview.1
 
-PR 1:     feature A is merged
-          main -> 11.0-preview.1
-
-PR 2:     bug fix is merged
-          main -> 11.0-preview.2
-
-PR 3:     documentation is merged
-          main -> 11.0-preview.3
+PR 2: version.json -> 1.0.0-preview.2
+  draft becomes v1.0.0-preview.2
 ```
 
-The preview number is a version height calculated from Git history. It is not
-a pull-request counter. If a merge strategy creates additional commits, or if
-commits are rebased, cherry-picked, or merged in a different order, the exact
-height can differ. The important behavior is that each later `main` commit has
-a unique, increasing preview version without another manual version change.
+The preview number is an intentional release number, not a pull-request
+counter. This Microsoft-style format requires a version change when publishing
+the next preview. Ordinary PRs do not create new public package versions.
 
-Pull-request builds from topic branches can have a commit ID in the version
-because those branches are not public release refs. After the pull request is
-merged into `main`, NBGV calculates the public preview version for the `main`
-commit.
+NBGV stamps the exact committed version and adds Git commit information to
+assembly metadata. Topic-branch builds can still include a commit ID because
+those branches are not public release refs.
 
-Do not create a version-changing commit for every preview build. Build and test every pull request, but publish preview packages on the cadence the project needs, such as nightly or manually approved builds.
+Do not create a version-changing commit for every ordinary PR. Create one when
+you intentionally publish the next preview package.
 
 Check the calculated version at any point with:
 
@@ -112,9 +107,9 @@ A topic branch that is not listed in `publicReleaseRefSpec` may include a commit
 When the code is ready for stabilization, create a pull request that changes the release intent:
 
 ```bash
-nbgv set-version 11.0-rc
+./release-version.sh prepare-rc 1.0.0 1
 git add version.json
-git commit -m "Begin 11.0 release candidate"
+git commit -m "Begin 1.0 release candidate"
 ```
 
 After the pull request merges, build and test the resulting `main` commit. If that exact commit is approved for RC publication, create its tag:
@@ -126,16 +121,20 @@ git push origin <tag-created-by-nbgv>
 
 `nbgv tag` uses the version calculated for the current commit. It does not change `version.json`.
 
-If another RC is required, merge the required fixes and tag the new approved commit. The version height will advance from Git history.
+If another RC is required, merge the required fixes and create a new version PR:
+
+```bash
+./release-version.sh prepare-rc 1.0.0 2
+```
 
 ## Publish a stable release
 
 When the RC is accepted, create a second pull request that removes the prerelease designation:
 
 ```bash
-nbgv set-version 11.0
+./release-version.sh prepare-stable 1.0.0
 git add version.json
-git commit -m "Declare 11.0 stable"
+git commit -m "Declare 1.0 stable"
 ```
 
 After the pull request merges, validate that exact commit and create the stable tag:
@@ -146,14 +145,14 @@ nbgv tag
 git push origin <tag-created-by-nbgv>
 ```
 
-The resulting tag should be similar to `v11.0.0`. The tag records which commit was released and triggers the tag-based publishing workflow.
+The resulting tag should be `v1.0.0`. The tag records which commit was released and triggers the tag-based publishing workflow.
 
 After stable publication, advance `main` to the next development line before accepting work for it:
 
 ```bash
-nbgv set-version 11.1-preview
+./release-version.sh prepare-preview 1.1.0 1
 git add version.json
-git commit -m "Start 11.1 preview"
+git commit -m "Start 1.1 preview"
 ```
 
 ## Release Drafter and stable release notes
@@ -183,9 +182,9 @@ v10.0.0                 previous stable release
   |-- Preview PR A
   |-- Preview PR B
   |-- Preview PR C
-v11.0.0-rc.1             published release candidate
+v1.0.0-rc.1              published release candidate
   |-- RC fix PR
-v11.0.0                 stable release
+v1.0.0                  stable release
 ```
 
 The RC draft includes Preview PR A, B, and C because they are changes since
@@ -227,7 +226,7 @@ The repository's tag publishing workflow should run only after a version tag is 
 
 ### Preview
 
-1. Set the next prerelease base with `nbgv set-version`.
+1. Set the next preview number with `./release-version.sh prepare-preview`.
 2. Open and merge the version change as a pull request.
 3. Merge normal feature, fix, test, and documentation pull requests.
 4. Use `nbgv get-version` to inspect the calculated version.
@@ -235,7 +234,7 @@ The repository's tag publishing workflow should run only after a version tag is 
 
 ### RC
 
-1. Set the RC base with `nbgv set-version 11.0-rc`.
+1. Set the RC version with `./release-version.sh prepare-rc`.
 2. Open and merge that change as a pull request.
 3. Test the exact `main` commit.
 4. Run `nbgv tag` on the approved commit.
@@ -243,7 +242,7 @@ The repository's tag publishing workflow should run only after a version tag is 
 
 ### Stable
 
-1. Set the stable base with `nbgv set-version 11.0`.
+1. Set the stable version with `./release-version.sh prepare-stable`.
 2. Open and merge that change as a pull request.
 3. Test the exact `main` commit.
 4. Run `nbgv tag` on the approved commit.
@@ -254,7 +253,7 @@ The repository's tag publishing workflow should run only after a version tag is 
 
 The version suffix represents a product decision: unstable preview, release candidate, or stable. Keeping that decision in a pull request gives the project a reviewable audit trail and makes the built commit deterministic.
 
-Tags have a different job. They identify the exact commit that was approved and published. Using a tag alone to promote `11.0-rc` to `11.0` would not work because NBGV intentionally calculates versions from committed files and Git history.
+Tags have a different job. They identify the exact commit that was approved and published. Using a tag alone to promote `1.0.0-rc.1` to `1.0.0` would not work because NBGV calculates versions from committed files and Git history.
 
 ## References
 

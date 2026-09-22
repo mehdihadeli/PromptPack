@@ -69,7 +69,10 @@ jobs:
       - name: Calculate version
         id: version
         shell: bash
-        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)" >> "$GITHUB_OUTPUT"
+        run: |
+          version="$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)"
+          echo "Calculated SemVer2 version: $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
   publish:
     name: Publish package and release assets

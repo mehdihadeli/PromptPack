@@ -204,12 +204,17 @@ same release line. If the project instead wants stable notes to contain only
 changes made after the RC, set `include-pre-releases: true`; that is not the
 PromptPack policy.
 
-The workflow in `.github/workflows/release-drafter.yml` runs on pushes to
-`main`, so it keeps one draft current. NBGV supplies the calculated version,
-while Release Drafter collects merged pull requests and formats the notes. The
-single publish job in `.github/workflows/build-and-publish.yml` uses that same
-calculated version. It publishes previews from `main` and publishes RC/stable
-releases from `v*` tags.
+The Release Drafter action runs only inside the single publish job in
+`.github/workflows/build-and-publish.yml`. NBGV supplies the calculated
+version, while Release Drafter collects merged pull requests and formats the
+notes. That job publishes previews from `main` and publishes RC/stable releases
+from `v*` tags. There is no separate Release Drafter workflow, which avoids
+duplicate drafts and competing publication runs.
+
+The Release Drafter step uses `if: always()`. If NuGet publication or executable
+publication fails, it still updates the release draft so the failure does not
+lose the collected release notes. The workflow remains failed and must still be
+fixed and rerun before the release is considered complete.
 
 Do not use a second release-creation action for the tag. NBGV creates the tag,
 Release Drafter publishes the matching draft, and the build workflow uploads
@@ -231,10 +236,10 @@ git push origin <branch>
 Open and merge the pull request. The merge causes the following actions:
 
 1. NBGV calculates `1.0.0-preview.1` from the committed `version.json`.
-2. The Release Drafter workflow creates or updates one draft named `v1.0.0-preview.1`.
+2. The publish job creates or updates the Release Drafter draft named `v1.0.0-preview.1`.
 3. The build workflow builds and tests the merge.
-4. The publish job publishes the calculated NuGet package and creates or
-   updates the matching GitHub prerelease with its binary assets.
+4. The publish job publishes the calculated NuGet package and updates the
+   matching GitHub draft with its binary assets. It does not publish the draft.
 
 Ordinary feature, bug-fix, test, and documentation pull requests update the
 same draft. They do not change the version. To publish another preview, run
@@ -341,8 +346,7 @@ Use NBGV and Release Drafter for different parts of the same release process:
 
 ### During preview development
 
-The push to `main` triggers `.github/workflows/release-drafter.yml`. It runs
-NBGV with:
+The publish job calculates the NBGV version with:
 
 ```bash
 nbgv get-version -v SemVer2
@@ -355,8 +359,8 @@ merged pull requests to its notes. They do not create separate drafts.
 
 When the next preview is intentionally prepared, the version PR changes
 `version.json` to `1.1.0-preview.2`. The next push to `main` updates the rolling
-draft and automatically publishes the calculated preview package and
-prerelease. No tag is required for previews.
+draft and automatically publishes the calculated preview package. The GitHub
+release remains a draft. No tag is required for previews.
 
 ### During RC or stable publication
 
@@ -372,7 +376,7 @@ The tag starts `.github/workflows/build-and-publish.yml`. That workflow uses
 `SemVer2` again, packages with the calculated version, publishes to NuGet, and
 passes the pushed tag to Release Drafter with `publish: true`. It then uploads
 the binary assets. This is the same publish path used for previews; only the
-trigger differs.
+trigger and Release Drafter publication mode differ.
 
 Do not run Release Drafter manually after pushing the tag, and do not create a
 tag from Release Drafter. If a preview publish or tag publish fails, fix the

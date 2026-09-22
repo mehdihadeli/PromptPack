@@ -121,13 +121,14 @@ jobs:
           done
 
       - name: Publish matching Release Drafter draft
+        if: always()
         uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
           version: ${{ needs['calculate-version'].outputs.version }}
           name: v${{ needs['calculate-version'].outputs.version }}
           tag: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v{0}', needs['calculate-version'].outputs.version) }}
-          publish: true
+          publish: ${{ startsWith(github.ref, 'refs/tags/v') && !contains(needs['calculate-version'].outputs.version, '-preview.') }}
           prerelease: ${{ contains(needs['calculate-version'].outputs.version, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

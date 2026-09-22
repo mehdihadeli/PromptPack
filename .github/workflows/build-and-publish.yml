@@ -44,10 +44,39 @@ jobs:
       - name: Test CLI
         run: dotnet test --project tests/PromptPack.Cli.Tests/PromptPack.Cli.Tests.csproj --configuration Release --no-restore
 
-  publish:
-    name: Publish packages and release assets
-    if: startsWith(github.ref, 'refs/tags/v')
+  calculate-version:
+    name: Calculate release version
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     needs: build-test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install nbgv CLI
+        run: dotnet tool install --tool-path "$RUNNER_TEMP/nbgv" nbgv --version 3.10.94
+
+      - name: Calculate version
+        id: version
+        shell: bash
+        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Publish package and release assets
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(needs['calculate-version'].outputs.version, '-preview.'))
+    needs:
+      - build-test
+      - calculate-version
     runs-on: ubuntu-latest
     environment: nuget
     permissions:
@@ -67,16 +96,8 @@ jobs:
       - name: Restore
         run: dotnet restore src/PromptPack.Cli/PromptPack.Cli.csproj
 
-      - name: Install nbgv CLI
-        run: dotnet tool install --tool-path "$RUNNER_TEMP/nbgv" nbgv --version 3.10.94
-
-      - name: Calculate release version
-        id: version
-        shell: bash
-        run: echo "version=$($RUNNER_TEMP/nbgv/nbgv get-version -v SemVer2)" >> "$GITHUB_OUTPUT"
-
       - name: Pack
-        run: dotnet pack src/PromptPack.Cli/PromptPack.Cli.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true
+        run: dotnet pack src/PromptPack.Cli/PromptPack.Cli.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:PackageVersion=${{ needs['calculate-version'].outputs.version }}
 
       - name: Publish to NuGet.org
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
@@ -103,11 +124,11 @@ jobs:
         uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
-          version: ${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
-          tag: ${{ github.ref_name }}
+          version: ${{ needs['calculate-version'].outputs.version }}
+          name: v${{ needs['calculate-version'].outputs.version }}
+          tag: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v{0}', needs['calculate-version'].outputs.version) }}
           publish: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(needs['calculate-version'].outputs.version, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -115,4 +136,4 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.ref_name }}" artifacts/promptpack-*.tar.gz --clobber
+        run: gh release upload "${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v{0}', needs['calculate-version'].outputs.version) }}" artifacts/promptpack-*.tar.gz --clobber

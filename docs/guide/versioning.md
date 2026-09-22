@@ -163,13 +163,14 @@ git commit -m "Start 1.1 preview"
 
 ## Release Drafter and stable release notes
 
-Release Drafter updates one rolling draft after every merge to `main`. Preview
-merges should build and test normally; they also update that same draft with the
-new version and merged pull requests. This does not publish a GitHub Release.
+Release Drafter updates one rolling draft after every merge to `main`. The
+unified publish job also calculates the NBGV `SemVer2` version and runs for a
+`main` merge only when that version contains `-preview.`. A merged preview
+version therefore publishes the NuGet package, binaries, and a GitHub
+prerelease automatically.
 
-When the version is ready for RC or stable publication, create and push the tag
-locally with NBGV. The tag-triggered build then publishes the matching draft
-after its build, test, package, and asset steps succeed.
+RC and stable merges to `main` still build and test, but do not publish. Their
+publication starts only after the approved `v*` tag is pushed with NBGV.
 
 Set this in `.github/release-drafter.yml`:
 
@@ -206,13 +207,191 @@ PromptPack policy.
 The workflow in `.github/workflows/release-drafter.yml` runs on pushes to
 `main`, so it keeps one draft current. NBGV supplies the calculated version,
 while Release Drafter collects merged pull requests and formats the notes. The
-tag-triggered job in `.github/workflows/build-and-publish.yml` publishes that
-matching draft and uploads the release assets; it does not create a second
-GitHub Release.
+single publish job in `.github/workflows/build-and-publish.yml` uses that same
+calculated version. It publishes previews from `main` and publishes RC/stable
+releases from `v*` tags.
 
 Do not use a second release-creation action for the tag. NBGV creates the tag,
 Release Drafter publishes the matching draft, and the build workflow uploads
 assets to that release.
+
+## End-to-end GitHub Flow
+
+### First preview
+
+Start the first release line from a working branch:
+
+```bash
+./release-version.sh prepare-preview 1.0.0
+git add version.json
+git commit -m "Start 1.0.0-preview.1"
+git push origin <branch>
+```
+
+Open and merge the pull request. The merge causes the following actions:
+
+1. NBGV calculates `1.0.0-preview.1` from the committed `version.json`.
+2. The Release Drafter workflow creates or updates one draft named `v1.0.0-preview.1`.
+3. The build workflow builds and tests the merge.
+4. The publish job publishes the calculated NuGet package and creates or
+   updates the matching GitHub prerelease with its binary assets.
+
+Ordinary feature, bug-fix, test, and documentation pull requests update the
+same draft. They do not change the version. To publish another preview, run
+`prepare-preview` and merge its version pull request:
+
+```bash
+./release-version.sh prepare-preview 1.0.0
+```
+
+This changes the version to `1.0.0-preview.2` because the helper reads the
+current preview number from `version.json` and increments it.
+
+### First stable release
+
+When preview validation is complete, prepare the stable version:
+
+```bash
+./release-version.sh prepare-stable 1.0.0
+git add version.json
+git commit -m "Prepare 1.0.0 stable release"
+git push origin <branch>
+```
+
+Merge the pull request and verify the exact commit:
+
+```bash
+git checkout main
+git pull --ff-only
+nbgv get-version -v SemVer2
+```
+
+The result must be:
+
+```text
+1.0.0
+```
+
+Release Drafter updates the rolling draft to `v1.0.0`. On the first release,
+it may display a warning that no previous published release exists. This is
+expected: `v1.0.0` is the first comparison baseline.
+
+After build and test validation, create and push the tag locally:
+
+```bash
+./release-version.sh tag
+git push origin v1.0.0
+```
+
+The tag triggers the publish job. That job publishes the package, publishes the
+matching Release Drafter draft, and uploads release assets. Do not create a
+second GitHub Release manually.
+
+### Continue after stable
+
+After `v1.0.0` is published, begin the next release line:
+
+```bash
+./release-version.sh prepare-preview 1.1.0
+git add version.json
+git commit -m "Start 1.1.0-preview.1"
+git push origin <branch>
+```
+
+After merging the version pull request, the next rolling draft is
+`v1.1.0-preview.1`. Stable release notes use `v1.0.0` as their baseline because
+`include-pre-releases: false` ignores published preview and RC releases when
+choosing the comparison release.
+
+### RC and stable promotion
+
+When `1.1.0` is ready for stabilization:
+
+```bash
+./release-version.sh prepare-rc 1.1.0
+```
+
+Merge that version pull request, validate the commit, then run:
+
+```bash
+./release-version.sh tag
+git push origin v1.1.0-rc.1
+```
+
+If another RC is required, merge fixes and run `prepare-rc 1.1.0` again. The
+helper changes the version to `1.1.0-rc.2`. After the RC is accepted, use
+`prepare-stable 1.1.0`, merge it, and tag `v1.1.0`.
+
+Every tag must be created from the exact approved `main` commit. NBGV creates
+the tag; Release Drafter does not create tags.
+
+## Release Drafter alongside NBGV
+
+Use NBGV and Release Drafter for different parts of the same release process:
+
+| Activity                 | NBGV or helper                                 | Release Drafter                                     |
+| ------------------------ | ---------------------------------------------- | --------------------------------------------------- |
+| Choose `1.1.0-preview.1` | `prepare-preview 1.1.0` changes `version.json` | Uses the calculated `SemVer2` value for the draft   |
+| Merge ordinary PR        | Keeps the committed version unchanged          | Adds the merged PR to the one rolling draft         |
+| Choose `1.1.0-preview.2` | `prepare-preview 1.1.0` increments the version | Updates the same draft to `v1.1.0-preview.2`        |
+| Choose `1.1.0-rc.1`      | `prepare-rc 1.1.0` changes `version.json`      | Updates the same draft to `v1.1.0-rc.1`             |
+| Approve RC               | `nbgv tag` creates `v1.1.0-rc.1`               | Tag-triggered workflow publishes the matching draft |
+| Choose `1.1.0`           | `prepare-stable 1.1.0` changes `version.json`  | Updates the draft to `v1.1.0`                       |
+| Approve stable           | `nbgv tag` creates `v1.1.0`                    | Tag-triggered workflow publishes the matching draft |
+
+### During preview development
+
+The push to `main` triggers `.github/workflows/release-drafter.yml`. It runs
+NBGV with:
+
+```bash
+nbgv get-version -v SemVer2
+```
+
+That value is passed to Release Drafter as the version, name, and tag. For
+example, after a version PR sets `1.1.0-preview.1`, the draft is named
+`v1.1.0-preview.1`. Later ordinary PRs update the same draft and add their
+merged pull requests to its notes. They do not create separate drafts.
+
+When the next preview is intentionally prepared, the version PR changes
+`version.json` to `1.1.0-preview.2`. The next push to `main` updates the rolling
+draft and automatically publishes the calculated preview package and
+prerelease. No tag is required for previews.
+
+### During RC or stable publication
+
+After the version PR is merged and the exact commit is approved, run NBGV
+locally:
+
+```bash
+./release-version.sh tag
+git push origin <tag-created-by-nbgv>
+```
+
+The tag starts `.github/workflows/build-and-publish.yml`. That workflow uses
+`SemVer2` again, packages with the calculated version, publishes to NuGet, and
+passes the pushed tag to Release Drafter with `publish: true`. It then uploads
+the binary assets. This is the same publish path used for previews; only the
+trigger differs.
+
+Do not run Release Drafter manually after pushing the tag, and do not create a
+tag from Release Drafter. If a preview publish or tag publish fails, fix the
+workflow or release problem and rerun it; NuGet's `--skip-duplicate` makes a
+retry of an already published package harmless.
+
+### Stable release-note baseline
+
+The configuration contains:
+
+```yaml
+include-pre-releases: false
+```
+
+This tells Release Drafter to use the previous stable release as the comparison
+baseline. Therefore, stable notes include the preview and RC pull requests for
+the release line, while the published RC itself is not treated as a separate
+baseline. The first stable release has no previous baseline, so its warning is
+normal and disappears for later release lines.
 
 ## GitHub Actions requirements
 
@@ -226,7 +405,10 @@ NBGV requires the repository's Git history and `.git` directory. GitHub Actions 
 
 Keep this setting in every workflow that builds, packs, calculates, or publishes a version. Do not rewrite `version.json` or remove prerelease suffixes inside CI. Version intent belongs in reviewed source-control changes.
 
-The repository's tag publishing workflow should run only after a version tag is pushed. The tag workflow can publish both RC and stable packages if that is the project policy; otherwise, distinguish stable tags from prerelease tags in the job condition.
+The publish job runs after successful builds and tests for either a preview
+version on `main` or an approved `v*` tag. RC and stable version changes merged
+to `main` do not satisfy the preview condition, so they do not publish until a
+tag is pushed.
 
 ## Release checklist
 
@@ -235,8 +417,9 @@ The repository's tag publishing workflow should run only after a version tag is 
 1. Set the next preview number with `./release-version.sh prepare-preview`.
 2. Open and merge the version change as a pull request.
 3. Merge normal feature, fix, test, and documentation pull requests.
-4. Use `nbgv get-version` to inspect the calculated version.
-5. Publish preview packages only when the release policy requires them.
+4. Use `nbgv get-version -v SemVer2` to inspect the calculated version.
+5. Merge the version PR; CI automatically publishes the preview package and
+   GitHub prerelease.
 
 ### RC
 
